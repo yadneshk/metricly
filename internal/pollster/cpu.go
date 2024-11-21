@@ -123,40 +123,46 @@ func calculateStealUsage(prev, curr cpuUsage) float64 {
 }
 
 // collectCPUUsage collects the CPU usage as a percentage over a defined time interval.
-func ReportCpuUsage(cc *MetricCollector) {
+func ReportCpuUsage(mc *MetricCollector) {
 	// Capture initial CPU stats
 	prevCPU, _ := readCPUStats()
-	// if err != nil {
-	// 	return 0, err
-	// }
 
 	// Wait for a small interval to calculate the usage delta
 	time.Sleep(1 * time.Second)
 
 	// Capture current CPU stats
 	currCPU, _ := readCPUStats()
-	// if err != nil {
-	// 	return 0, err
-	// }
 
 	// Calculate CPU usage percentage
-	cc.UpdateMetric(
+	mc.UpdateMetric(
 		"cpu_total",
 		calculateTotalUsage(prevCPU, currCPU),
 		"CPU usage percentage",
 		map[string]string{"hostname": "mynode"},
 	)
 
-	// // Calculate user CPU usage percentage
-	// usage = calculateUserUsage(prevCPU, currCPU)
-	// cc.UpdateMetric("cpu_user", usage)
+	// Calculate user CPU usage percentage
+	mc.UpdateMetric(
+		"cpu_user",
+		calculateUserUsage(prevCPU, currCPU),
+		"User process CPU usage percentage",
+		map[string]string{"hostname": "mynode"},
+	)
 
-	// // Calculate system (kernel level) CPU usage percentage
-	// usage = calculateSystemUsage(prevCPU, currCPU)
-	// cc.UpdateMetric("cpu_system", usage)
+	// Calculate system (kernel level) CPU usage percentage
+	mc.UpdateMetric(
+		"cpu_system",
+		calculateSystemUsage(prevCPU, currCPU),
+		"System process CPU usage percentage",
+		map[string]string{"hostname": "mynode"},
+	)
 
-	// // Calculate steal percentage
-	// usage = calculateStealUsage(prevCPU, currCPU)
-	// cc.UpdateMetric("cpu_steal", usage)
+	// Calculate steal percentage
+	mc.UpdateMetric(
+		"cpu_steam",
+		calculateStealUsage(prevCPU, currCPU),
+		"CPU steam percentage",
+		map[string]string{"hostname": "mynode"},
+	)
 
 }

@@ -4,7 +4,6 @@ import (
 	"log"
 	"time"
 
-	"metricly/internal/pollster"
 	"metricly/internal/server"
 )
 
@@ -18,9 +17,7 @@ func main() {
 	collectionInterval := defaultCollectionInterval
 	port := defaultPort
 
-	// cc := pollster.CreateMetricCollector()
-	cc := pollster.CreateMetricCollector()
-	err := server.StartServer(port, cc, collectionInterval)
+	err := server.StartServer(port, collectionInterval)
 
 	if err != nil {
 		log.Fatalf("Error starting server %v", err)
