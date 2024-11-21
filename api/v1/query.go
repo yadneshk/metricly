@@ -22,8 +22,8 @@ http://localhost:9090/api/v1/query?query=cpu_steal
 }
 
 Implements endpoints:
-/api/v1/query?query=cpu_total&time=2024-11-21T09:18:00.001Z
-/api/v1/query_range?query=up&start=2015-07-01T20:10:30.781Z&end=2015-07-01T20:11:00.781Z&step=15s
+/api/v1/query?query=cpu_total&timestamp=2024-11-21T09:18:00.001Z
+
 
 */
 
@@ -31,10 +31,23 @@ package v1
 
 import (
 	"encoding/json"
+	"metricly/config"
 	"net/http"
 )
 
-func PrometheusQueryHandler() http.HandlerFunc {
+// represents the structure of the reponse Prometheus's API call
+type PrometheusQueryResponse struct {
+	Status string `json:"status"`
+	Data   struct {
+		ResultType string `json:"resultType"`
+		Result     []struct {
+			Metric map[string]string `json:"metric"`
+			Value  [2]interface{}    `json:"value"`
+		} `json:"result"`
+	} `json:"data"`
+}
+
+func PrometheusQueryHandler(conf *config.Config) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		input_query := r.URL.Query().Get("query")
 
@@ -49,7 +62,10 @@ func PrometheusQueryHandler() http.HandlerFunc {
 		if timestamp != "" {
 			queryParams["time"] = timestamp
 		}
-		response, _ := QueryPrometheus(PreparePromQuery(queryParams))
+
+		promQuery := PreparePromQuery(conf, "query", queryParams)
+		var response PrometheusQueryResponse
+		_ = QueryPrometheus(promQuery, &response)
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(response)
 	}

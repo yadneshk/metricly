@@ -3,9 +3,10 @@ package v1
 import (
 	"log"
 	"net/http"
+	"metricly/config"
 )
 
-func HandleRoutes(mux *http.ServeMux) {
+func HandleRoutes(mux *http.ServeMux, conf *config.Config) {
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		_, err := w.Write([]byte(
 			`<html>
@@ -20,7 +21,9 @@ func HandleRoutes(mux *http.ServeMux) {
 		}
 	})
 
-	mux.HandleFunc("/api/v1/metrics", MetricsHandler())
+	mux.HandleFunc("/api/v1/metrics", MetricsHandler(conf))
 
-	mux.HandleFunc("/api/v1/query", PrometheusQueryHandler())
+	mux.HandleFunc("/api/v1/query", PrometheusQueryHandler(conf))
+
+	mux.HandleFunc("/api/v1/query_range", prometheusQueryRangeHandler(conf))
 }

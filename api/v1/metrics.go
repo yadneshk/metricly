@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"time"
 
+	"metricly/config"
 	"metricly/internal/pollster"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -11,7 +12,7 @@ import (
 )
 
 // MetricsHandler serves the Prometheus metrics endpoint.
-func MetricsHandler() http.HandlerFunc {
+func MetricsHandler(conf *config.Config) http.HandlerFunc {
 
 	cc := pollster.CreateMetricCollector()
 	prometheus.MustRegister(cc)
@@ -19,7 +20,7 @@ func MetricsHandler() http.HandlerFunc {
 	go func() {
 		for {
 			pollster.ReportCpuUsage(cc)
-			time.Sleep(10 * time.Second)
+			time.Sleep(conf.CollectionInterval * time.Second)
 		}
 	}()
 

@@ -14,7 +14,7 @@ func main() {
 		log.Fatalf("Error loading config file %v", err)
 	}
 
-	err = server.StartServer(config.Server.Address, config.Server.Port, config.CollectionInterval)
+	err = server.StartServer(config)
 
 	if err != nil {
 		log.Fatalf("Error starting server %v", err)
