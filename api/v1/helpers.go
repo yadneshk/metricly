@@ -13,7 +13,7 @@ func QueryPrometheus[T any](queryURL string, target *T) error {
 
 	resp, err := http.Get(queryURL)
 	if err != nil {
-		return fmt.Errorf("failed to query")
+		return fmt.Errorf("failed to query: %v", err)
 	}
 	defer resp.Body.Close()
 

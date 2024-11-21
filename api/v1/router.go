@@ -26,4 +26,6 @@ func HandleRoutes(mux *http.ServeMux, conf *config.Config) {
 	mux.HandleFunc("/api/v1/query", PrometheusQueryHandler(conf))
 
 	mux.HandleFunc("/api/v1/query_range", prometheusQueryRangeHandler(conf))
+
+	mux.HandleFunc("/api/v1/aggregate", PrometheusAggregateHandler(conf))
 }
