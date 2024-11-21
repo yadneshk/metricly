@@ -159,9 +159,9 @@ func ReportCpuUsage(mc *MetricCollector) {
 
 	// Calculate steal percentage
 	mc.UpdateMetric(
-		"cpu_steam",
+		"cpu_steal",
 		calculateStealUsage(prevCPU, currCPU),
-		"CPU steam percentage",
+		"CPU steal percentage",
 		map[string]string{"hostname": "mynode"},
 	)
 

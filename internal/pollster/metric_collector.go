@@ -6,20 +6,20 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
-type Metric struct {
+type metric struct {
 	description string
 	value       float64
 	labels      map[string]string
 }
 
 type MetricCollector struct {
-	metrics map[string]Metric
+	metrics map[string]metric
 	mu      sync.RWMutex
 }
 
 func CreateMetricCollector() *MetricCollector {
 	return &MetricCollector{
-		metrics: make(map[string]Metric),
+		metrics: make(map[string]metric),
 	}
 }
 
@@ -59,7 +59,7 @@ func (cc *MetricCollector) Collect(ch chan<- prometheus.Metric) {
 func (cc *MetricCollector) UpdateMetric(name string, value float64, description string, labels map[string]string) {
 	cc.mu.Lock()
 	defer cc.mu.Unlock()
-	cc.metrics[name] = Metric{
+	cc.metrics[name] = metric{
 		description: description,
 		value:       value,
 		labels:      labels,
