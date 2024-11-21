@@ -7,12 +7,12 @@ import (
 	"time"
 )
 
-func StartServer(port int, interval time.Duration) error {
+func StartServer(address string, port string, interval time.Duration) error {
 
 	mux := http.NewServeMux()
 	v1.HandleRoutes(mux)
 
-	metricsURL := fmt.Sprintf("%s:%d", "", port)
+	metricsURL := fmt.Sprintf("%s:%s", address, port)
 
 	server := &http.Server{
 		Addr:    metricsURL,
