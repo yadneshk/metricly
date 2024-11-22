@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"metricly/config"
 	"net/http"
 )
 
@@ -33,14 +32,4 @@ func QueryPrometheus[T any](queryURL string, target *T) error {
 	}
 	return nil
 
-}
-
-func PreparePromQuery(conf *config.Config, promExpr string, params map[string]string) string {
-
-	// query := "http://10.1.23.133:9090/api/v1/query?"
-	query := fmt.Sprintf("http://%s:%s/api/v1/%s?", conf.Prometheus.Address, conf.Prometheus.Port, promExpr)
-	for param, value := range params {
-		query += fmt.Sprintf("&%s=%s", param, value)
-	}
-	return query
 }
