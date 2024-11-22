@@ -2,8 +2,8 @@ package v1
 
 import (
 	"log"
-	"net/http"
 	"metricly/config"
+	"net/http"
 )
 
 func HandleRoutes(mux *http.ServeMux, conf *config.Config) {

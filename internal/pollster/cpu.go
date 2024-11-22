@@ -3,8 +3,8 @@ package pollster
 import (
 	"bufio"
 	"fmt"
+	"metricly/pkg/common"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -41,36 +41,27 @@ func readCPUStats() (cpuUsage, error) {
 			}
 
 			usage := cpuUsage{}
-			usage.User = parseUint(fields[1])
+			usage.User = common.ParseUint(fields[1])
 			usage.Total += usage.User
-			usage.Nice = parseUint(fields[2])
+			usage.Nice = common.ParseUint(fields[2])
 			usage.Total += usage.Nice
-			usage.System = parseUint(fields[3])
+			usage.System = common.ParseUint(fields[3])
 			usage.Total += usage.System
-			usage.Idle = parseUint(fields[4])
+			usage.Idle = common.ParseUint(fields[4])
 			usage.Total += usage.Idle
-			usage.Iowait = parseUint(fields[5])
+			usage.Iowait = common.ParseUint(fields[5])
 			usage.Total += usage.Iowait
-			usage.Irq = parseUint(fields[6])
+			usage.Irq = common.ParseUint(fields[6])
 			usage.Total += usage.Irq
-			usage.Softirq = parseUint(fields[7])
+			usage.Softirq = common.ParseUint(fields[7])
 			usage.Total += usage.Softirq
-			usage.Steal = parseUint(fields[8])
+			usage.Steal = common.ParseUint(fields[8])
 			usage.Total += usage.Steal
 
 			return usage, nil
 		}
 	}
 	return cpuUsage{}, fmt.Errorf("cpu stats not found in /proc/stat")
-}
-
-// parseUint safely parses a string to uint64
-func parseUint(s string) uint64 {
-	value, err := strconv.ParseUint(s, 10, 64)
-	if err != nil {
-		return 0
-	}
-	return value
 }
 
 // CalculateCPUUsage calculates the CPU usage percentage
@@ -133,12 +124,14 @@ func ReportCpuUsage(mc *MetricCollector) {
 	// Capture current CPU stats
 	currCPU, _ := readCPUStats()
 
+	labels := make(map[string]string)
+
 	// Calculate CPU usage percentage
 	mc.UpdateMetric(
 		"cpu_total",
 		calculateTotalUsage(prevCPU, currCPU),
 		"CPU usage percentage",
-		map[string]string{"hostname": "mynode"},
+		labels,
 	)
 
 	// Calculate user CPU usage percentage
@@ -146,7 +139,7 @@ func ReportCpuUsage(mc *MetricCollector) {
 		"cpu_user",
 		calculateUserUsage(prevCPU, currCPU),
 		"User process CPU usage percentage",
-		map[string]string{"hostname": "mynode"},
+		labels,
 	)
 
 	// Calculate system (kernel level) CPU usage percentage
@@ -154,7 +147,7 @@ func ReportCpuUsage(mc *MetricCollector) {
 		"cpu_system",
 		calculateSystemUsage(prevCPU, currCPU),
 		"System process CPU usage percentage",
-		map[string]string{"hostname": "mynode"},
+		labels,
 	)
 
 	// Calculate steal percentage
@@ -162,7 +155,7 @@ func ReportCpuUsage(mc *MetricCollector) {
 		"cpu_steal",
 		calculateStealUsage(prevCPU, currCPU),
 		"CPU steal percentage",
-		map[string]string{"hostname": "mynode"},
+		labels,
 	)
 
 }

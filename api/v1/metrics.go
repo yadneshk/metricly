@@ -24,6 +24,13 @@ func MetricsHandler(conf *config.Config) http.HandlerFunc {
 		}
 	}()
 
+	go func() {
+		for {
+			pollster.ReportMemoryUsage(cc)
+			time.Sleep(conf.CollectionInterval * time.Second)
+		}
+	}()
+
 	handler := promhttp.Handler()
 
 	return func(w http.ResponseWriter, r *http.Request) {

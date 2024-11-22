@@ -1,6 +1,8 @@
 package pollster
 
 import (
+	"fmt"
+	"metricly/pkg/common"
 	"sync"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -59,6 +61,13 @@ func (cc *MetricCollector) Collect(ch chan<- prometheus.Metric) {
 func (cc *MetricCollector) UpdateMetric(name string, value float64, description string, labels map[string]string) {
 	cc.mu.Lock()
 	defer cc.mu.Unlock()
+
+	// prepend exporter name to every metric name
+	name = fmt.Sprintf("metricly_%s", name)
+
+	// add hostname label to every metric
+	labels["hostname"] = common.GetHostname()
+
 	cc.metrics[name] = metric{
 		description: description,
 		value:       value,
