@@ -1,7 +1,6 @@
 package common
 
 import (
-	"log"
 	"os"
 	"strconv"
 )
@@ -15,10 +14,11 @@ func ParseUint(s string) uint64 {
 
 // hostname needed to append into metrics
 func GetHostname() string {
-	hostname, err := os.Hostname()
-	if err != nil {
-		log.Printf("Error getting hostname: %v\n", err)
-		return ""
+
+	// HOSTNAME env variable takes precedence
+	hostname := os.Getenv("HOSTNAME")
+	if hostname == "" {
+		hostname, _ = os.Hostname()
 	}
 	return hostname
 }
