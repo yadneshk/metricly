@@ -52,5 +52,6 @@ func LoadConfig() (*Config, error) {
 	if err := decoder.Decode(&cfg); err != nil {
 		return nil, fmt.Errorf("failed to parse config file %v", err)
 	}
+	log.Println("config loaded successfully: ", configPath)
 	return &cfg, nil
 }

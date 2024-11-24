@@ -2,6 +2,6 @@ server:
   address: 0.0.0.0
   port: 8080
 prometheus:
-  address: 0.0.0.0
+  address: metricly_metricly_1
   port: 9090
 interval: 10s
