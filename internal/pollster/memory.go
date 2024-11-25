@@ -69,62 +69,65 @@ func readMemoryStats() (memoryStats, error) {
 	return memStats, nil
 }
 
-func ReportMemoryUsage(mc *MetricCollector) {
+func RegisterMemoryMetrics(mc *MetriclyCollector) {
+	// constLabelMap := make(map[string]string)
+	mc.addMetric("memory_total_bytes", "Total memory usage", []string{"hostname"})
+	mc.addMetric("memory_free_bytes", "Free memory", []string{"hostname"})
+	mc.addMetric("memory_available_bytes", "available memory", []string{"hostname"})
+	mc.addMetric("memory_hugepages_total", "Total number of hugepages", []string{"hostname"})
+	mc.addMetric("memory_hugepages_free", "Free hugepages", []string{"hostname"})
+	mc.addMetric("memory_hugepages_rsvd", "Reserved hugepages", []string{"hostname"})
+	mc.addMetric("memory_hugepages_surp", "Surplus hugepages", []string{"hostname"})
+}
+
+func ReportMemoryUsage(mc *MetriclyCollector) {
 
 	memStats, err := readMemoryStats()
 	if err != nil {
 		log.Println(err)
 		return
 	}
-	labels := make(map[string]string)
 
-	mc.UpdateMetric(
+	mc.updateMetric(
 		"memory_total_bytes",
 		float64(memStats.MemTotal),
-		"Total memory bytes",
-		labels,
+		[]string{common.GetHostname()},
 	)
 
-	mc.UpdateMetric(
+	mc.updateMetric(
 		"memory_free_bytes",
 		float64(memStats.MemFree),
-		"Free memory bytes",
-		labels,
+		[]string{common.GetHostname()},
 	)
 
-	mc.UpdateMetric(
+	mc.updateMetric(
 		"memory_available_bytes",
 		float64(memStats.MemAvailabe),
-		"Total memory bytes",
-		labels,
+		[]string{common.GetHostname()},
 	)
 
-	mc.UpdateMetric(
+	mc.updateMetric(
 		"memory_hugepages_total",
 		float64(memStats.HugePagesTotal),
-		"Total memory bytes",
-		labels,
+		[]string{common.GetHostname()},
 	)
 
-	mc.UpdateMetric(
+	mc.updateMetric(
 		"memory_hugepages_free",
 		float64(memStats.HugePagesFree),
-		"Total memory bytes",
-		labels,
+		[]string{common.GetHostname()},
 	)
 
-	mc.UpdateMetric(
+	mc.updateMetric(
 		"memory_hugepages_rsvd",
 		float64(memStats.HugePagesRsvd),
-		"Total memory bytes",
-		labels,
+		[]string{common.GetHostname()},
 	)
 
-	mc.UpdateMetric(
+	mc.updateMetric(
 		"memory_hugepages_surp",
 		float64(memStats.HugePagesSurp),
-		"Total memory bytes",
-		labels,
+		[]string{common.GetHostname()},
 	)
 
 }

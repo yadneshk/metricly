@@ -113,8 +113,16 @@ func calculateStealUsage(prev, curr cpuUsage) float64 {
 	return 100.0 * float64(stealDelta) / float64(totalDelta)
 }
 
+func RegisterCPUMetrics(mc *MetriclyCollector) {
+	// constLabelMap := make(map[string]string)
+	mc.addMetric("cpu_total", "CPU usage percentage", []string{"hostname"})
+	mc.addMetric("cpu_user", "User process CPU usage percentage", []string{"hostname"})
+	mc.addMetric("cpu_system", "System process CPU usage percentage", []string{"hostname"})
+	mc.addMetric("cpu_steal", "CPU steal percentage", []string{"hostname"})
+}
+
 // collectCPUUsage collects the CPU usage as a percentage over a defined time interval.
-func ReportCpuUsage(mc *MetricCollector) {
+func ReportCpuUsage(mc *MetriclyCollector) {
 	// Capture initial CPU stats
 	prevCPU, _ := readCPUStats()
 
@@ -124,38 +132,42 @@ func ReportCpuUsage(mc *MetricCollector) {
 	// Capture current CPU stats
 	currCPU, _ := readCPUStats()
 
-	labels := make(map[string]string)
+	// labels := make(map[string]string)
 
-	// Calculate CPU usage percentage
-	mc.UpdateMetric(
-		"cpu_total",
-		calculateTotalUsage(prevCPU, currCPU),
-		"CPU usage percentage",
-		labels,
-	)
+	mc.updateMetric("cpu_total", calculateTotalUsage(prevCPU, currCPU), []string{common.GetHostname()})
+	mc.updateMetric("cpu_user", calculateUserUsage(prevCPU, currCPU), []string{common.GetHostname()})
+	mc.updateMetric("cpu_system", calculateSystemUsage(prevCPU, currCPU), []string{common.GetHostname()})
+	mc.updateMetric("cpu_steal", calculateStealUsage(prevCPU, currCPU), []string{common.GetHostname()})
+	// // Calculate CPU usage percentage
+	// mc.UpdateMetric(
+	// 	"cpu_total",
+	// 	calculateTotalUsage(prevCPU, currCPU),
+	// 	"CPU usage percentage",
+	// 	labels,
+	// )
 
-	// Calculate user CPU usage percentage
-	mc.UpdateMetric(
-		"cpu_user",
-		calculateUserUsage(prevCPU, currCPU),
-		"User process CPU usage percentage",
-		labels,
-	)
+	// // Calculate user CPU usage percentage
+	// mc.UpdateMetric(
+	// 	"cpu_user",
+	// 	calculateUserUsage(prevCPU, currCPU),
+	// 	"User process CPU usage percentage",
+	// 	labels,
+	// )
 
-	// Calculate system (kernel level) CPU usage percentage
-	mc.UpdateMetric(
-		"cpu_system",
-		calculateSystemUsage(prevCPU, currCPU),
-		"System process CPU usage percentage",
-		labels,
-	)
+	// // Calculate system (kernel level) CPU usage percentage
+	// mc.UpdateMetric(
+	// 	"cpu_system",
+	// 	calculateSystemUsage(prevCPU, currCPU),
+	// 	"System process CPU usage percentage",
+	// 	labels,
+	// )
 
-	// Calculate steal percentage
-	mc.UpdateMetric(
-		"cpu_steal",
-		calculateStealUsage(prevCPU, currCPU),
-		"CPU steal percentage",
-		labels,
-	)
+	// // Calculate steal percentage
+	// mc.UpdateMetric(
+	// 	"cpu_steal",
+	// 	calculateStealUsage(prevCPU, currCPU),
+	// 	"CPU steal percentage",
+	// 	labels,
+	// )
 
 }

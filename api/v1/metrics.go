@@ -17,6 +17,10 @@ func MetricsHandler(conf *config.Config) http.HandlerFunc {
 	cc := pollster.CreateMetricCollector()
 	prometheus.MustRegister(cc)
 
+	pollster.RegisterCPUMetrics(cc)
+	pollster.RegisterMemoryMetrics(cc)
+	pollster.RegisterNetworkMetrics(cc)
+
 	go func() {
 		for {
 			pollster.ReportCpuUsage(cc)
@@ -27,6 +31,13 @@ func MetricsHandler(conf *config.Config) http.HandlerFunc {
 	go func() {
 		for {
 			pollster.ReportMemoryUsage(cc)
+			time.Sleep(conf.CollectionInterval * time.Second)
+		}
+	}()
+
+	go func() {
+		for {
+			pollster.ReportNetworkUsage(cc)
 			time.Sleep(conf.CollectionInterval * time.Second)
 		}
 	}()
