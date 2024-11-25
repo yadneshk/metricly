@@ -8,9 +8,8 @@ import (
 )
 
 type metricData struct {
-	description string
-	value       float64
-	labels      []string
+	value  float64
+	labels []string
 }
 
 type MetriclyCollector struct {
