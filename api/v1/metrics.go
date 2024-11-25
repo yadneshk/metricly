@@ -23,8 +23,7 @@ func MetricsHandler(conf *config.Config) http.HandlerFunc {
 
 	go func() {
 		for {
-			pollster.ReportCpuUsage(cc)
-			time.Sleep(conf.CollectionInterval * time.Second)
+			pollster.ReportCpuUsage(cc, conf)
 		}
 	}()
 

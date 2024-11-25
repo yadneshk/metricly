@@ -3,6 +3,8 @@ package pollster
 import (
 	"bufio"
 	"fmt"
+	"log"
+	"metricly/config"
 	"metricly/pkg/common"
 	"os"
 	"strings"
@@ -21,9 +23,13 @@ type cpuUsage struct {
 	Total   uint64
 }
 
+var (
+	procStat = "/proc/stat"
+)
+
 // ReadCPUStats reads CPU statistics from /proc/stat
 func readCPUStats() (cpuUsage, error) {
-	file, err := os.Open("/proc/stat")
+	file, err := os.Open(procStat)
 	if err != nil {
 		return cpuUsage{}, err
 	}
@@ -64,6 +70,10 @@ func readCPUStats() (cpuUsage, error) {
 	return cpuUsage{}, fmt.Errorf("cpu stats not found in /proc/stat")
 }
 
+func truncate(value float64) float64 {
+	return float64(int(value*100)) / 100
+}
+
 // CalculateCPUUsage calculates the CPU usage percentage
 func calculateTotalUsage(prev, curr cpuUsage) float64 {
 
@@ -74,7 +84,7 @@ func calculateTotalUsage(prev, curr cpuUsage) float64 {
 		return 0.0
 	}
 
-	return 100.0 * float64(totalDelta-idleDelta) / float64(totalDelta)
+	return truncate(100.0 * float64(totalDelta-idleDelta) / float64(totalDelta))
 }
 
 func calculateUserUsage(prev, curr cpuUsage) float64 {
@@ -86,7 +96,7 @@ func calculateUserUsage(prev, curr cpuUsage) float64 {
 		return 0.0
 	}
 
-	return 100.0 * float64(userDelta) / float64(totalDelta)
+	return truncate(100.0 * float64(userDelta) / float64(totalDelta))
 }
 
 func calculateSystemUsage(prev, curr cpuUsage) float64 {
@@ -98,7 +108,7 @@ func calculateSystemUsage(prev, curr cpuUsage) float64 {
 		return 0.0
 	}
 
-	return 100.0 * float64(systemDelta) / float64(totalDelta)
+	return truncate(100.0 * float64(systemDelta) / float64(totalDelta))
 }
 
 func calculateStealUsage(prev, curr cpuUsage) float64 {
@@ -110,11 +120,10 @@ func calculateStealUsage(prev, curr cpuUsage) float64 {
 		return 0.0
 	}
 
-	return 100.0 * float64(stealDelta) / float64(totalDelta)
+	return truncate(100.0 * float64(stealDelta) / float64(totalDelta))
 }
 
 func RegisterCPUMetrics(mc *MetriclyCollector) {
-	// constLabelMap := make(map[string]string)
 	mc.addMetric("cpu_total", "CPU usage percentage", []string{"hostname"})
 	mc.addMetric("cpu_user", "User process CPU usage percentage", []string{"hostname"})
 	mc.addMetric("cpu_system", "System process CPU usage percentage", []string{"hostname"})
@@ -122,52 +131,18 @@ func RegisterCPUMetrics(mc *MetriclyCollector) {
 }
 
 // collectCPUUsage collects the CPU usage as a percentage over a defined time interval.
-func ReportCpuUsage(mc *MetriclyCollector) {
+func ReportCpuUsage(mc *MetriclyCollector, conf *config.Config) {
 	// Capture initial CPU stats
 	prevCPU, _ := readCPUStats()
-
-	// Wait for a small interval to calculate the usage delta
-	time.Sleep(1 * time.Second)
+	log.Println(conf.CollectionInterval)
+	time.Sleep(conf.CollectionInterval * time.Second)
 
 	// Capture current CPU stats
 	currCPU, _ := readCPUStats()
-
-	// labels := make(map[string]string)
 
 	mc.updateMetric("cpu_total", calculateTotalUsage(prevCPU, currCPU), []string{common.GetHostname()})
 	mc.updateMetric("cpu_user", calculateUserUsage(prevCPU, currCPU), []string{common.GetHostname()})
 	mc.updateMetric("cpu_system", calculateSystemUsage(prevCPU, currCPU), []string{common.GetHostname()})
 	mc.updateMetric("cpu_steal", calculateStealUsage(prevCPU, currCPU), []string{common.GetHostname()})
-	// // Calculate CPU usage percentage
-	// mc.UpdateMetric(
-	// 	"cpu_total",
-	// 	calculateTotalUsage(prevCPU, currCPU),
-	// 	"CPU usage percentage",
-	// 	labels,
-	// )
-
-	// // Calculate user CPU usage percentage
-	// mc.UpdateMetric(
-	// 	"cpu_user",
-	// 	calculateUserUsage(prevCPU, currCPU),
-	// 	"User process CPU usage percentage",
-	// 	labels,
-	// )
-
-	// // Calculate system (kernel level) CPU usage percentage
-	// mc.UpdateMetric(
-	// 	"cpu_system",
-	// 	calculateSystemUsage(prevCPU, currCPU),
-	// 	"System process CPU usage percentage",
-	// 	labels,
-	// )
-
-	// // Calculate steal percentage
-	// mc.UpdateMetric(
-	// 	"cpu_steal",
-	// 	calculateStealUsage(prevCPU, currCPU),
-	// 	"CPU steal percentage",
-	// 	labels,
-	// )
 
 }

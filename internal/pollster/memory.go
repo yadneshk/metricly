@@ -9,6 +9,10 @@ import (
 	"strings"
 )
 
+var (
+	procMemInfo = "/proc/meminfo"
+)
+
 type memoryStats struct {
 	MemTotal       uint64
 	MemFree        uint64
@@ -20,7 +24,7 @@ type memoryStats struct {
 }
 
 func readMemoryStats() (memoryStats, error) {
-	memInfo, err := os.Open("/proc/meminfo")
+	memInfo, err := os.Open(procMemInfo)
 	if err != nil {
 		return memoryStats{}, err
 	}
@@ -51,13 +55,13 @@ func readMemoryStats() (memoryStats, error) {
 			memStats.MemFree = value
 		case "MemAvailable":
 			memStats.MemAvailabe = value
-		case "HugePagesTotal":
+		case "HugePages_Total":
 			memStats.HugePagesTotal = value
-		case "HugePagesFree":
+		case "HugePages_Free":
 			memStats.HugePagesFree = value
-		case "HugePagesRsvd":
+		case "HugePages_Rsvd":
 			memStats.HugePagesRsvd = value
-		case "HugePagesSurp":
+		case "HugePages_Surp":
 			memStats.HugePagesSurp = value
 		}
 	}
