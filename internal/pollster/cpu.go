@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"log"
-	"metricly/config"
 	"metricly/pkg/common"
 	"os"
 	"strings"
@@ -131,11 +130,13 @@ func RegisterCPUMetrics(mc *MetriclyCollector) {
 }
 
 // collectCPUUsage collects the CPU usage as a percentage over a defined time interval.
-func ReportCpuUsage(mc *MetriclyCollector, conf *config.Config) {
+func ReportCpuUsage(mc *MetriclyCollector) {
+	log.Println("Polling CPU metrics...")
+
 	// Capture initial CPU stats
 	prevCPU, _ := readCPUStats()
-	log.Println(conf.CollectionInterval)
-	time.Sleep(conf.CollectionInterval * time.Second)
+	// log.Println(conf.CollectionInterval)
+	time.Sleep(10 * time.Second)
 
 	// Capture current CPU stats
 	currCPU, _ := readCPUStats()
@@ -145,4 +146,5 @@ func ReportCpuUsage(mc *MetriclyCollector, conf *config.Config) {
 	mc.updateMetric("cpu_system", calculateSystemUsage(prevCPU, currCPU), []string{common.GetHostname()})
 	mc.updateMetric("cpu_steal", calculateStealUsage(prevCPU, currCPU), []string{common.GetHostname()})
 
+	log.Println("Polling CPU metrics complete")
 }

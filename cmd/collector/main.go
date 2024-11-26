@@ -1,10 +1,14 @@
 package main
 
 import (
+	"context"
 	"log"
 
 	"metricly/config"
+	"metricly/internal/pollster"
 	"metricly/internal/server"
+
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 func main() {
@@ -13,6 +17,16 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error loading config file %v", err)
 	}
+
+	cc := pollster.CreateMetricCollector()
+	prometheus.MustRegister(cc)
+
+	// Context for clean shutdown
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	// Start metrics collection
+	server.StartMetricsCollection(ctx, config.CollectionInterval, cc)
 
 	err = server.StartServer(config)
 

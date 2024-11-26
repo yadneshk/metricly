@@ -2,7 +2,6 @@ package pollster
 
 import (
 	"log"
-	"metricly/config"
 	"os"
 	"testing"
 	"time"
@@ -136,7 +135,7 @@ cpu0 100 150 200 250 30 35 40 45 50`
 		fi.Close()
 	}()
 
-	ReportCpuUsage(mc, &config.Config{CollectionInterval: 10})
+	ReportCpuUsage(mc)
 
 	// Validate metrics
 	if metric, exists := mc.data["metricly_cpu_total"]; exists {

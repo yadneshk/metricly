@@ -85,7 +85,7 @@ func RegisterMemoryMetrics(mc *MetriclyCollector) {
 }
 
 func ReportMemoryUsage(mc *MetriclyCollector) {
-
+	log.Println("Polling Memory metrics...")
 	memStats, err := readMemoryStats()
 	if err != nil {
 		log.Println(err)
@@ -133,5 +133,5 @@ func ReportMemoryUsage(mc *MetriclyCollector) {
 		float64(memStats.HugePagesSurp),
 		[]string{common.GetHostname()},
 	)
-
+	log.Println("Polling Memory metrics complete")
 }

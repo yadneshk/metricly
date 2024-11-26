@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"log"
 	v1 "metricly/api/v1"
 	"net/http"
 
@@ -19,6 +20,6 @@ func StartServer(conf *config.Config) error {
 		Addr:    metricsURL,
 		Handler: mux,
 	}
-
+	log.Println("Start hosting metrics...")
 	return server.ListenAndServe()
 }

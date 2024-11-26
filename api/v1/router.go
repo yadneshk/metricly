@@ -21,7 +21,7 @@ func HandleRoutes(mux *http.ServeMux, conf *config.Config) {
 		}
 	})
 
-	mux.HandleFunc("/api/v1/metrics", MetricsHandler(conf))
+	mux.Handle("/api/v1/metrics", MetricsHandler(conf))
 
 	mux.HandleFunc("/api/v1/query", PrometheusQueryHandler(conf))
 
