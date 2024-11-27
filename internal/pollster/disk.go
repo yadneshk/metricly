@@ -127,7 +127,7 @@ func getMountPoints() ([]string, error) {
 
 	file, err := os.Open(procMounts)
 	if err != nil {
-		return nil, fmt.Errorf("failed to open /proc/mounts: %v", err)
+		return nil, fmt.Errorf("failed to open %s: %v", procMounts, err)
 	}
 	defer file.Close()
 

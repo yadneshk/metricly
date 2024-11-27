@@ -1,6 +1,8 @@
 package pollster
 
 import (
+	"fmt"
+	"metricly/pkg/common"
 	"os"
 	"testing"
 )
@@ -97,7 +99,7 @@ HugePages_Surp:         8`
 	ReportMemoryUsage(mc)
 	// fmt.Println(mc)
 	// Validate the metrics
-	if metric, exists := mc.data["metricly_memory_total_bytes"]; exists {
+	if metric, exists := mc.data[fmt.Sprintf("memory_total_bytes|%s", common.GetHostname())]; exists {
 		if metric.value != 16384000*1024 {
 			t.Errorf("expected memory_total_bytes=16384000, got %f", metric.value)
 		}
@@ -105,27 +107,27 @@ HugePages_Surp:         8`
 		t.Error("metricly_memory_total_bytes not found in metrics data")
 	}
 
-	if metric, exists := mc.data["metricly_memory_free_bytes"]; exists {
+	if metric, exists := mc.data[fmt.Sprintf("memory_free_bytes|%s", common.GetHostname())]; exists {
 		if metric.value != 8192000*1024 {
 			t.Errorf("expected memory_free_bytes=8192000, got %f", metric.value)
 		}
 	} else {
-		t.Error("metricly_memory_free_bytes not found in metrics data")
+		t.Error("memory_free_bytes not found in metrics data")
 	}
 
-	if metric, exists := mc.data["metricly_memory_available_bytes"]; exists {
+	if metric, exists := mc.data[fmt.Sprintf("memory_available_bytes|%s", common.GetHostname())]; exists {
 		if metric.value != 12288000*1024 {
 			t.Errorf("expected memory_available_bytes=12288000, got %f", metric.value)
 		}
 	} else {
-		t.Error("metricly_memory_available_bytes not found in metrics data")
+		t.Error("memory_available_bytes not found in metrics data")
 	}
 
-	if metric, exists := mc.data["metricly_memory_hugepages_total"]; exists {
+	if metric, exists := mc.data[fmt.Sprintf("memory_hugepages_total|%s", common.GetHostname())]; exists {
 		if metric.value != 64 {
 			t.Errorf("expected memory_hugepages_total=64, got %f", metric.value)
 		}
 	} else {
-		t.Error("metricly_memory_hugepages_total not found in metrics data")
+		t.Error("memory_hugepages_total not found in metrics data")
 	}
 }

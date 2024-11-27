@@ -157,5 +157,3 @@ This project is licensed under the MIT License. See the `LICENSE` file for detai
 For questions or support, please create an issue or contact the maintainer at [yadnesh45@gmail.com](mailto:yadnesh45@gmail.com).
 
 ---
-
-With this README, users will have a clear understanding of Metricly’s functionality and how to get started with it.
