@@ -8,10 +8,10 @@ import (
 
 func StartMetricsCollection(ctx context.Context, interval time.Duration, cc *pollster.MetriclyCollector) {
 
-	
 	pollster.RegisterCPUMetrics(cc)
 	pollster.RegisterNetworkMetrics(cc)
 	pollster.RegisterMemoryMetrics(cc)
+	pollster.RegisterDiskMetrics(cc)
 
 	// Helper function to periodically execute metric reporting
 	startPolling := func(reportFunc func(*pollster.MetriclyCollector)) {
@@ -33,4 +33,5 @@ func StartMetricsCollection(ctx context.Context, interval time.Duration, cc *pol
 	startPolling(pollster.ReportCpuUsage)
 	startPolling(pollster.ReportMemoryUsage)
 	startPolling(pollster.ReportNetworkUsage)
+	startPolling(pollster.ReportDiskUsage)
 }
