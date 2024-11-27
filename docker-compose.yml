@@ -9,10 +9,13 @@ services:
       - /etc/metricly/config.yaml:/etc/metricly/config.yaml:ro
       - /proc/stat:/proc/stat:ro
       - /proc/meminfo:/proc/meminfo:ro
-      - /proc/net/dev:/mnt/net_dev:ro
+      - /proc/diskstats:/proc/diskstats:ro
+      - /proc/net/dev:/mnt/metricly/dev:ro
+      - /proc/self/mounts:/mnt/metricly/mounts:ro
     environment:
       - HOSTNAME=${HOSTNAME}
-      - PROC_NET_DEV=/mnt/net_dev
+      - PROC_NET_DEV=/mnt/metricly/dev
+      - PROC_MOUNTS=/mnt/metricly/mounts
     network_mode: host
 
   prometheus:
@@ -33,6 +36,7 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     volumes:
       - ./config/grafana/provisioning/:/etc/grafana/provisioning/:ro
+      - ./config/infrastructure.json:/var/lib/grafana/dashboards/infrastructure.json:ro
     network_mode: host
     restart: always
     depends_on:
