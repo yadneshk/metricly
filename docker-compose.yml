@@ -1,33 +1,29 @@
-version: "3.8"
-
 services:
   metricly:
     container_name: metricly_metricly
     build:
       context: .
       dockerfile: Dockerfile
-    ports:
-      - "8080:8080"
     restart: always
     volumes:
       - /etc/metricly/config.yaml:/etc/metricly/config.yaml:ro
       - /proc/stat:/proc/stat:ro
       - /proc/meminfo:/proc/meminfo:ro
-      # - /proc/net/dev:/proc/net/dev:ro
+      - /proc/net/dev:/mnt/net_dev:ro
     environment:
       - HOSTNAME=${HOSTNAME}
+      - PROC_NET_DEV=/mnt/net_dev
+    network_mode: host
 
   prometheus:
     container_name: metricly_prometheus
     image: prom/prometheus:latest
     volumes:
-      - /etc/metricly/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-    ports:
-      - "9090:9090"
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    network_mode: host
     restart: always
     depends_on:
       - metricly
-        # condition: service_healthy
 
   grafana:
     container_name: metricly_grafana
@@ -36,16 +32,8 @@ services:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
     volumes:
-      - /etc/metricly/provisioning/:/etc/grafana/provisioning/:ro
-      # - grafana-data:/var/lib/grafana
-    ports:
-      - "3000:3000"
+      - ./config/grafana/provisioning/:/etc/grafana/provisioning/:ro
+    network_mode: host
     restart: always
     depends_on:
       - prometheus
-
-
-# networks:
-#   metricly:
-#     name: metricly
-#     driver: bridge

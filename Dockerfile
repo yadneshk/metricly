@@ -1,5 +1,5 @@
 # Dockerfile
-FROM golang:1.21.13 AS builder
+FROM golang:1.23.3 AS builder
 WORKDIR /app
 
 # Copy and build the Go project

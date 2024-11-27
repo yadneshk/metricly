@@ -8,6 +8,10 @@ import (
 	"strings"
 )
 
+var (
+	procNetDev = "/proc/net/dev"
+)
+
 type networkStats struct {
 	interfaceName string
 	bytesRx       uint64
@@ -21,7 +25,12 @@ type networkStats struct {
 }
 
 func readNetworkStats() ([]networkStats, error) {
-	nwStats, err := os.Open("/proc/net/dev")
+
+	if procNetDevEnv := os.Getenv("PROC_NET_DEV"); procNetDev != "" {
+		procNetDev = procNetDevEnv
+	}
+
+	nwStats, err := os.Open(procNetDev)
 	if err != nil {
 		return []networkStats{}, err
 	}
