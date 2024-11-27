@@ -1,9 +1,11 @@
 package v1
 
 import (
-	"log"
+	"fmt"
 	"metricly/config"
 	"net/http"
+
+	"log/slog"
 )
 
 func HandleRoutes(mux *http.ServeMux, conf *config.Config) {
@@ -17,7 +19,7 @@ func HandleRoutes(mux *http.ServeMux, conf *config.Config) {
 			</body>
 			</html>`))
 		if err != nil {
-			log.Fatal(err)
+			slog.Error(fmt.Sprint(err))
 		}
 	})
 

@@ -2,6 +2,7 @@ version: "3.8"
 
 services:
   metricly:
+    container_name: metricly_metricly
     build:
       context: .
       dockerfile: Dockerfile
@@ -10,11 +11,14 @@ services:
     restart: always
     volumes:
       - /etc/metricly/config.yaml:/etc/metricly/config.yaml:ro
-      - /proc:/proc:ro
+      - /proc/stat:/proc/stat:ro
+      - /proc/meminfo:/proc/meminfo:ro
+      # - /proc/net/dev:/proc/net/dev:ro
     environment:
       - HOSTNAME=${HOSTNAME}
 
   prometheus:
+    container_name: metricly_prometheus
     image: prom/prometheus:latest
     volumes:
       - /etc/metricly/prometheus.yml:/etc/prometheus/prometheus.yml:ro
@@ -22,10 +26,11 @@ services:
       - "9090:9090"
     restart: always
     depends_on:
-      metricly:
-        condition: service_healthy
+      - metricly
+        # condition: service_healthy
 
   grafana:
+    container_name: metricly_grafana
     image: grafana/grafana
     environment:
       - GF_SECURITY_ADMIN_USER=admin

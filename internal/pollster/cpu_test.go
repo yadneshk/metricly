@@ -79,7 +79,7 @@ func TestCalculateCPUUsage(t *testing.T) {
 
 	// Calculate and validate percentages
 	totalUsage := calculateTotalUsage(prev, curr)
-	log.Println(totalUsage)
+
 	if totalUsage != 66.66 {
 		t.Errorf("expected totalUsage=66.666667, got %f", totalUsage)
 	}

@@ -2,7 +2,7 @@ package pollster
 
 import (
 	"bufio"
-	"log"
+	"log/slog"
 	"metricly/pkg/common"
 	"os"
 	"strings"
@@ -71,7 +71,7 @@ func RegisterNetworkMetrics(mc *MetriclyCollector) {
 
 func ReportNetworkUsage(mc *MetriclyCollector) {
 
-	log.Println("Polling Network metrics...")
+	slog.Info("Polling Network metrics...")
 	currNWStat, _ := readNetworkStats()
 
 	for _, stat := range currNWStat {
@@ -128,5 +128,5 @@ func ReportNetworkUsage(mc *MetriclyCollector) {
 			[]string{common.GetHostname(), stat.interfaceName},
 		)
 	}
-	log.Println("Polling Network metrics complete")
+	slog.Info("Polling Network metrics complete")
 }

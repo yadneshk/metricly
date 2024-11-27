@@ -3,7 +3,7 @@ package pollster
 import (
 	"bufio"
 	"fmt"
-	"log"
+	"log/slog"
 	"metricly/pkg/common"
 	"os"
 	"strings"
@@ -85,10 +85,10 @@ func RegisterMemoryMetrics(mc *MetriclyCollector) {
 }
 
 func ReportMemoryUsage(mc *MetriclyCollector) {
-	log.Println("Polling Memory metrics...")
+	slog.Info("Polling Memory metrics...")
 	memStats, err := readMemoryStats()
 	if err != nil {
-		log.Println(err)
+		slog.Warn(fmt.Sprint(err))
 		return
 	}
 
@@ -133,5 +133,5 @@ func ReportMemoryUsage(mc *MetriclyCollector) {
 		float64(memStats.HugePagesSurp),
 		[]string{common.GetHostname()},
 	)
-	log.Println("Polling Memory metrics complete")
+	slog.Info("Polling Memory metrics complete")
 }

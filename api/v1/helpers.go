@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 )
 
@@ -32,4 +33,13 @@ func QueryPrometheus[T any](queryURL string, target *T) error {
 	}
 	return nil
 
+}
+
+// log API requests
+func logAPIRequests(r *http.Request, duration int64, statusCode int) {
+	slog.Info(
+		fmt.Sprintf(
+			"%s %s %s status: %d len: %d time: %dms", r.RemoteAddr, r.Method, r.URL, statusCode, r.ContentLength, duration,
+		),
+	)
 }

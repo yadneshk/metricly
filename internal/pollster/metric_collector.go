@@ -2,7 +2,7 @@ package pollster
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
 	"sync"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -66,7 +66,7 @@ func (mc *MetriclyCollector) addMetric(name string, description string, labels [
 			labels,
 			nil,
 		)
-		log.Printf("Adding metric %s to rgistry: %T\n", name, prometheus.DefaultRegisterer)
+		slog.Debug(fmt.Sprintf("Adding metric %s to registry %T\n", name, prometheus.DefaultRegisterer))
 	}
 }
 

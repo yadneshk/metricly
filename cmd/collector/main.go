@@ -2,8 +2,9 @@ package main
 
 import (
 	"context"
-	"log"
-
+	"flag"
+	"fmt"
+	"log/slog"
 	"metricly/config"
 	"metricly/internal/pollster"
 	"metricly/internal/server"
@@ -12,10 +13,16 @@ import (
 )
 
 func main() {
-	// Load configuration (hardcoded defaults for simplicity)
-	config, err := config.LoadConfig()
+	// Load configuration
+	configPath := flag.String("config", "", "configuration file path")
+	flag.Parse()
+	config, err := config.LoadConfig(configPath)
 	if err != nil {
-		log.Fatalf("Error loading config file %v", err)
+		slog.Error(fmt.Sprintf("Error loading config file %v", err))
+	}
+
+	if config.Debug {
+		slog.SetLogLoggerLevel(slog.LevelDebug)
 	}
 
 	cc := pollster.CreateMetricCollector()
@@ -31,7 +38,7 @@ func main() {
 	err = server.StartServer(config)
 
 	if err != nil {
-		log.Fatalf("Error starting server %v", err)
+		slog.Error(fmt.Sprintf("Failed to start server: %v", err))
 	}
 
 }
