@@ -4,6 +4,7 @@ BUILD_DIR := build
 SRC_DIR := ./cmd/collector/
 BIN := $(BUILD_DIR)/$(APP_NAME)
 COMPOSE_FILE := docker-compose.yml
+CONFIG_FILE ?= ./config/config.yaml # Default config file location
 
 # Build the Go binary
 .PHONY: build
@@ -15,8 +16,8 @@ build:
 # Run Podman Compose to deploy the containers
 .PHONY: run
 run: build
-	@echo "Running Metricly..."
-	./$(BUILD_DIR)/$(APP_NAME)
+	@echo "Running Metricly with config: $(CONFIG_FILE)"
+	./$(BUILD_DIR)/$(APP_NAME) --config $(CONFIG_FILE)
 
 # Run Podman Compose to deploy the containers
 .PHONY: run_compose_up
