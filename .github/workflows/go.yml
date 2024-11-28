@@ -62,9 +62,9 @@ jobs:
           password: ${{ secrets.QUAY_PASSWORD }}
 
       - name: Build and Push Docker Image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
-          context: .
+          context: ../../Dockerfile
           push: true
-          tags: ${{ secrets.QUAY_USERNAME }}/metricly:latest
+          tags: quay.io/${{ secrets.QUAY_USERNAME }}/metricly:latest
 
