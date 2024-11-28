@@ -64,7 +64,7 @@ jobs:
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v6
         with:
-          context: ../../
+          context: .
           file: ./Dockerfile
           push: true
           tags: quay.io/yadneshk/metricly:latest
