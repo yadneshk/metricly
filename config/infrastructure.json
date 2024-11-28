@@ -1956,7 +1956,7 @@
           "targets": [
             {
               "editorMode": "code",
-              "expr": "disk_usage_percentage",
+              "expr": "disk_available_bytes/1024/1024/1024",
               "legendFormat": "{{mount_point}}",
               "range": true,
               "refId": "A"

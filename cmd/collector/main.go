@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"metricly/config"
-	"metricly/internal/pollster"
+	collector "metricly/internal/collector"
 	"metricly/internal/server"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -25,7 +25,7 @@ func main() {
 		slog.SetLogLoggerLevel(slog.LevelDebug)
 	}
 
-	cc := pollster.CreateMetricCollector()
+	cc := collector.CreateMetricCollector()
 	prometheus.MustRegister(cc)
 
 	// Context for clean shutdown

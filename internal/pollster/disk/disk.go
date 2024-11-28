@@ -1,9 +1,10 @@
-package pollster
+package disk
 
 import (
 	"bufio"
 	"fmt"
 	"log/slog"
+	collector "metricly/internal/collector"
 	"metricly/pkg/common"
 	"os"
 	"strings"
@@ -37,6 +38,11 @@ type diskSpaceStat struct {
 
 // parseDiskStats parses /proc/diskstats for metrics.
 func parseDiskStats() (map[string]diskStats, error) {
+
+	if procDiskStatsEnv := os.Getenv("PROC_DISK_STATS"); procDiskStatsEnv != "" {
+		procDiskStats = procDiskStatsEnv
+	}
+
 	file, err := os.Open(procDiskStats)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open %s: %v", procDiskStats, err)
@@ -121,7 +127,7 @@ func readDiskSpaceStats(mountPoint []string) (map[string]diskSpaceStat, error) {
 // GetMountPoints retrieves a list of mount points from /proc/mounts
 func getMountPoints() ([]string, error) {
 
-	if procMountsEnv := os.Getenv("PROC_MOUNTS"); procMountsEnv != "" {
+	if procMountsEnv := os.Getenv("PROC_DISK_MOUNTS"); procMountsEnv != "" {
 		procMounts = procMountsEnv
 	}
 
@@ -159,22 +165,22 @@ func getMountPoints() ([]string, error) {
 }
 
 // RegisterDiskMetrics registers disk metrics.
-func RegisterDiskMetrics(mc *MetriclyCollector) {
-	mc.addMetric("disk_reads_completed_total", "Total disk reads completed", []string{"device"})
-	mc.addMetric("disk_writes_completed_total", "Total disk writes completed", []string{"device"})
-	mc.addMetric("disk_read_throughput_bytes", "Disk read throughput in bytes", []string{"device"})
-	mc.addMetric("disk_write_throughput_bytes", "Disk write throughput in bytes", []string{"device"})
-	mc.addMetric("disk_io_in_progress", "Current disk IO operations in progress", []string{"device"})
-	mc.addMetric("disk_io_time_spent_seconds", "Time spent on IO operations in seconds", []string{"device"})
-	mc.addMetric("disk_weighted_io_time_seconds", "Weighted time spent on IO in seconds", []string{"device"})
-	mc.addMetric("disk_total_bytes", "Total disk space in bytes", []string{"mount_point"})
-	mc.addMetric("disk_used_bytes", "Used disk space in bytes", []string{"mount_point"})
-	mc.addMetric("disk_available_bytes", "Available disk space in bytes", []string{"mount_point"})
-	mc.addMetric("disk_usage_percentage", "Disk usage percentage", []string{"mount_point"})
+func RegisterDiskMetrics(mc *collector.MetriclyCollector) {
+	mc.AddMetric("disk_reads_completed_total", "Total disk reads completed", []string{"device"})
+	mc.AddMetric("disk_writes_completed_total", "Total disk writes completed", []string{"device"})
+	mc.AddMetric("disk_read_throughput_bytes", "Disk read throughput in bytes", []string{"device"})
+	mc.AddMetric("disk_write_throughput_bytes", "Disk write throughput in bytes", []string{"device"})
+	mc.AddMetric("disk_io_in_progress", "Current disk IO operations in progress", []string{"device"})
+	mc.AddMetric("disk_io_time_spent_seconds", "Time spent on IO operations in seconds", []string{"device"})
+	mc.AddMetric("disk_weighted_io_time_seconds", "Weighted time spent on IO in seconds", []string{"device"})
+	mc.AddMetric("disk_total_bytes", "Total disk space in bytes", []string{"mount_point"})
+	mc.AddMetric("disk_used_bytes", "Used disk space in bytes", []string{"mount_point"})
+	mc.AddMetric("disk_available_bytes", "Available disk space in bytes", []string{"mount_point"})
+	mc.AddMetric("disk_usage_percentage", "Disk usage percentage", []string{"mount_point"})
 }
 
 // ReportDiskMetrics reports disk metrics periodically.
-func ReportDiskUsage(mc *MetriclyCollector) {
+func ReportDiskUsage(mc *collector.MetriclyCollector) {
 	slog.Info("Polling Disk metrics...")
 	// get disk I/O usage
 	diskStatsMap, err := parseDiskStats()
@@ -184,43 +190,43 @@ func ReportDiskUsage(mc *MetriclyCollector) {
 	}
 
 	for device, stats := range diskStatsMap {
-		mc.updateMetric(
+		mc.UpdateMetric(
 			"disk_reads_completed_total",
 			float64(stats.ReadsCompleted),
 			[]string{device},
 		)
 
-		mc.updateMetric(
+		mc.UpdateMetric(
 			"disk_writes_completed_total",
 			float64(stats.WriteCompleted),
 			[]string{device},
 		)
 
-		mc.updateMetric(
+		mc.UpdateMetric(
 			"disk_read_throughput_bytes",
 			float64(stats.ReadThroughputBytes),
 			[]string{device},
 		)
 
-		mc.updateMetric(
+		mc.UpdateMetric(
 			"disk_write_throughput_bytes",
 			float64(stats.WriteThroughputBytes),
 			[]string{device},
 		)
 
-		mc.updateMetric(
+		mc.UpdateMetric(
 			"disk_io_in_progress",
 			float64(stats.IOInProgress),
 			[]string{device},
 		)
 
-		mc.updateMetric(
+		mc.UpdateMetric(
 			"disk_io_time_spent_seconds",
 			float64(stats.IOTimeSpentMillis)/1000.0,
 			[]string{device},
 		)
 
-		mc.updateMetric(
+		mc.UpdateMetric(
 			"disk_weighted_io_time_seconds",
 			float64(stats.WeightedIOTimeSpentMs)/1000.0,
 			[]string{device},
@@ -240,22 +246,22 @@ func ReportDiskUsage(mc *MetriclyCollector) {
 		return
 	}
 	for mount, stats := range diskSpaceStats {
-		mc.updateMetric(
+		mc.UpdateMetric(
 			"disk_total_bytes",
 			float64(stats.Total),
 			[]string{mount},
 		)
-		mc.updateMetric(
+		mc.UpdateMetric(
 			"disk_used_bytes",
 			float64(stats.Used),
 			[]string{mount},
 		)
-		mc.updateMetric(
+		mc.UpdateMetric(
 			"disk_available_bytes",
 			float64(stats.Available),
 			[]string{mount},
 		)
-		mc.updateMetric(
+		mc.UpdateMetric(
 			"disk_usage_percentage",
 			float64(stats.Usage),
 			[]string{mount},
