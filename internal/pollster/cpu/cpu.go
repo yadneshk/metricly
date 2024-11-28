@@ -1,9 +1,10 @@
-package pollster
+package cpu
 
 import (
 	"bufio"
 	"fmt"
 	"log/slog"
+	collector "metricly/internal/collector"
 	"metricly/pkg/common"
 	"os"
 	"strings"
@@ -28,6 +29,11 @@ var (
 
 // ReadCPUStats reads CPU statistics from /proc/stat
 func readCPUStats() (cpuUsage, error) {
+
+	if procStatEnv := os.Getenv("PROC_CPU_STAT"); procStatEnv != "" {
+		procStat = procStatEnv
+	}
+
 	file, err := os.Open(procStat)
 	if err != nil {
 		return cpuUsage{}, err
@@ -122,15 +128,15 @@ func calculateStealUsage(prev, curr cpuUsage) float64 {
 	return truncate(100.0 * float64(stealDelta) / float64(totalDelta))
 }
 
-func RegisterCPUMetrics(mc *MetriclyCollector) {
-	mc.addMetric("cpu_total", "CPU usage percentage", []string{"hostname"})
-	mc.addMetric("cpu_user", "User process CPU usage percentage", []string{"hostname"})
-	mc.addMetric("cpu_system", "System process CPU usage percentage", []string{"hostname"})
-	mc.addMetric("cpu_steal", "CPU steal percentage", []string{"hostname"})
+func RegisterCPUMetrics(mc *collector.MetriclyCollector) {
+	mc.AddMetric("cpu_total", "CPU usage percentage", []string{"hostname"})
+	mc.AddMetric("cpu_user", "User process CPU usage percentage", []string{"hostname"})
+	mc.AddMetric("cpu_system", "System process CPU usage percentage", []string{"hostname"})
+	mc.AddMetric("cpu_steal", "CPU steal percentage", []string{"hostname"})
 }
 
 // collectCPUUsage collects the CPU usage as a percentage over a defined time interval.
-func ReportCpuUsage(mc *MetriclyCollector) {
+func ReportCpuUsage(mc *collector.MetriclyCollector) {
 	slog.Info("Polling CPU metrics...")
 
 	// Capture initial CPU stats
@@ -141,10 +147,10 @@ func ReportCpuUsage(mc *MetriclyCollector) {
 	// Capture current CPU stats
 	currCPU, _ := readCPUStats()
 
-	mc.updateMetric("cpu_total", calculateTotalUsage(prevCPU, currCPU), []string{common.GetHostname()})
-	mc.updateMetric("cpu_user", calculateUserUsage(prevCPU, currCPU), []string{common.GetHostname()})
-	mc.updateMetric("cpu_system", calculateSystemUsage(prevCPU, currCPU), []string{common.GetHostname()})
-	mc.updateMetric("cpu_steal", calculateStealUsage(prevCPU, currCPU), []string{common.GetHostname()})
+	mc.UpdateMetric("cpu_total", calculateTotalUsage(prevCPU, currCPU), []string{common.GetHostname()})
+	mc.UpdateMetric("cpu_user", calculateUserUsage(prevCPU, currCPU), []string{common.GetHostname()})
+	mc.UpdateMetric("cpu_system", calculateSystemUsage(prevCPU, currCPU), []string{common.GetHostname()})
+	mc.UpdateMetric("cpu_steal", calculateStealUsage(prevCPU, currCPU), []string{common.GetHostname()})
 
 	slog.Info("Polling CPU metrics complete")
 }

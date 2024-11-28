@@ -10,48 +10,48 @@ import (
 )
 
 type metricData struct {
-	value  float64
-	labels []string
+	Value  float64
+	Labels []string
 }
 
 type MetriclyCollector struct {
-	metrics map[string]*prometheus.Desc
-	data    map[string]metricData
-	mutex   sync.Mutex
+	Metrics map[string]*prometheus.Desc
+	Data    map[string]metricData
+	Mutex   sync.Mutex
 }
 
 func CreateMetricCollector() *MetriclyCollector {
 	return &MetriclyCollector{
-		metrics: make(map[string]*prometheus.Desc),
-		data:    make(map[string]metricData),
+		Metrics: make(map[string]*prometheus.Desc),
+		Data:    make(map[string]metricData),
 	}
 }
 
 func (mc *MetriclyCollector) Describe(ch chan<- *prometheus.Desc) {
-	mc.mutex.Lock()
-	defer mc.mutex.Unlock()
+	mc.Mutex.Lock()
+	defer mc.Mutex.Unlock()
 
-	for _, desc := range mc.metrics {
+	for _, desc := range mc.Metrics {
 		ch <- desc
 	}
 
 }
 
 func (mc *MetriclyCollector) Collect(ch chan<- prometheus.Metric) {
-	mc.mutex.Lock()
-	defer mc.mutex.Unlock()
+	mc.Mutex.Lock()
+	defer mc.Mutex.Unlock()
 
 	// Split the key to extract the metric name and labels
-	for name, data := range mc.data {
+	for name, data := range mc.Data {
 		parts := strings.Split(name, "|")
 		metricName := parts[0]
 		labels := parts[1:]
 		// if _, exists := mc.metrics[name]; exists {
 
 		ch <- prometheus.MustNewConstMetric(
-			mc.metrics[metricName],
+			mc.Metrics[metricName],
 			prometheus.GaugeValue,
-			data.value,
+			data.Value,
 			labels...,
 		)
 		// ch <- metric
@@ -59,15 +59,15 @@ func (mc *MetriclyCollector) Collect(ch chan<- prometheus.Metric) {
 	}
 }
 
-func (mc *MetriclyCollector) addMetric(name string, description string, labels []string) {
-	mc.mutex.Lock()
-	defer mc.mutex.Unlock()
+func (mc *MetriclyCollector) AddMetric(name string, description string, labels []string) {
+	mc.Mutex.Lock()
+	defer mc.Mutex.Unlock()
 
 	// prepend exporter name to every metric name
 	// name = fmt.Sprintf("metricly_%s", name)
 
 	// if _, exists := mc.metrics[name]; !exists {
-	mc.metrics[name] = prometheus.NewDesc(
+	mc.Metrics[name] = prometheus.NewDesc(
 		name,
 		description,
 		labels,
@@ -77,9 +77,9 @@ func (mc *MetriclyCollector) addMetric(name string, description string, labels [
 	// }
 }
 
-func (mc *MetriclyCollector) updateMetric(name string, value float64, labels []string) {
-	mc.mutex.Lock()
-	defer mc.mutex.Unlock()
+func (mc *MetriclyCollector) UpdateMetric(name string, value float64, labels []string) {
+	mc.Mutex.Lock()
+	defer mc.Mutex.Unlock()
 
 	if len(labels) > 0 {
 		// Only Network and Disk collectors use labels while updating metrics
@@ -93,9 +93,9 @@ func (mc *MetriclyCollector) updateMetric(name string, value float64, labels []s
 	// name = fmt.Sprintf("metricly_%s", name)
 
 	// if _, exists := mc.metrics[name]; exists {
-	mc.data[name] = metricData{
-		value:  value,
-		labels: labels,
+	mc.Data[name] = metricData{
+		Value:  value,
+		Labels: labels,
 	}
 	// }
 

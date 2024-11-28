@@ -6,16 +6,20 @@ services:
       dockerfile: Dockerfile
     restart: always
     volumes:
-      - /etc/metricly/config.yaml:/etc/metricly/config.yaml:ro
-      - /proc/stat:/proc/stat:ro
-      - /proc/meminfo:/proc/meminfo:ro
-      - /proc/diskstats:/proc/diskstats:ro
-      - /proc/net/dev:/mnt/metricly/dev:ro
-      - /proc/self/mounts:/mnt/metricly/mounts:ro
+      - ./config/config.yaml:/etc/metricly/config.yaml:ro
+      # - /proc/stat:/proc/stat:ro
+      # - /proc/meminfo:/proc/meminfo:ro
+      # - /proc/diskstats:/proc/diskstats:ro
+      # - /proc/net/dev:/mnt/metricly/dev:ro
+      # - /proc/self/mounts:/mnt/metricly/mounts:ro
+      - /:/host/root:ro
     environment:
       - HOSTNAME=${HOSTNAME}
-      - PROC_NET_DEV=/mnt/metricly/dev
-      - PROC_MOUNTS=/mnt/metricly/mounts
+      - PROC_CPU_STAT=/host/root/proc/stat
+      - PROC_MEMORY_INFO=/host/root/proc/meminfo
+      - PROC_NETWORK_DEV=/host/root/proc/net/dev
+      - PROC_DISK_MOUNTS=/host/root/proc/mounts
+      - PROC_DISK_STATS=/host/root/proc/diskstats
     network_mode: host
 
   prometheus:

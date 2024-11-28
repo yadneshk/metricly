@@ -2,19 +2,23 @@ package server
 
 import (
 	"context"
-	"metricly/internal/pollster"
+	collector "metricly/internal/collector"
+	cpu "metricly/internal/pollster/cpu"
+	disk "metricly/internal/pollster/disk"
+	memory "metricly/internal/pollster/memory"
+	network "metricly/internal/pollster/network"
 	"time"
 )
 
-func StartMetricsCollection(ctx context.Context, interval time.Duration, cc *pollster.MetriclyCollector) {
+func StartMetricsCollection(ctx context.Context, interval time.Duration, cc *collector.MetriclyCollector) {
 
-	pollster.RegisterCPUMetrics(cc)
-	pollster.RegisterNetworkMetrics(cc)
-	pollster.RegisterMemoryMetrics(cc)
-	pollster.RegisterDiskMetrics(cc)
+	cpu.RegisterCPUMetrics(cc)
+	network.RegisterNetworkMetrics(cc)
+	memory.RegisterMemoryMetrics(cc)
+	disk.RegisterDiskMetrics(cc)
 
 	// Helper function to periodically execute metric reporting
-	startPolling := func(reportFunc func(*pollster.MetriclyCollector)) {
+	startPolling := func(reportFunc func(*collector.MetriclyCollector)) {
 		go func() {
 			ticker := time.NewTicker(interval)
 			defer ticker.Stop()
@@ -30,8 +34,8 @@ func StartMetricsCollection(ctx context.Context, interval time.Duration, cc *pol
 	}
 
 	// Start collectors for CPU, memory, and network metrics
-	startPolling(pollster.ReportCpuUsage)
-	startPolling(pollster.ReportMemoryUsage)
-	startPolling(pollster.ReportNetworkUsage)
-	startPolling(pollster.ReportDiskUsage)
+	startPolling(cpu.ReportCpuUsage)
+	startPolling(memory.ReportMemoryUsage)
+	startPolling(network.ReportNetworkUsage)
+	startPolling(disk.ReportDiskUsage)
 }

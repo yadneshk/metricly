@@ -1,9 +1,10 @@
-package pollster
+package memory
 
 import (
 	"bufio"
 	"fmt"
 	"log/slog"
+	collector "metricly/internal/collector"
 	"metricly/pkg/common"
 	"os"
 	"strings"
@@ -24,6 +25,11 @@ type memoryStats struct {
 }
 
 func readMemoryStats() (memoryStats, error) {
+
+	if procMemInfoEnv := os.Getenv("PROC_MEMORY_INFO"); procMemInfoEnv != "" {
+		procMemInfo = procMemInfoEnv
+	}
+
 	memInfo, err := os.Open(procMemInfo)
 	if err != nil {
 		return memoryStats{}, err
@@ -73,18 +79,18 @@ func readMemoryStats() (memoryStats, error) {
 	return memStats, nil
 }
 
-func RegisterMemoryMetrics(mc *MetriclyCollector) {
+func RegisterMemoryMetrics(mc *collector.MetriclyCollector) {
 	// constLabelMap := make(map[string]string)
-	mc.addMetric("memory_total_bytes", "Total memory usage", []string{"hostname"})
-	mc.addMetric("memory_free_bytes", "Free memory", []string{"hostname"})
-	mc.addMetric("memory_available_bytes", "available memory", []string{"hostname"})
-	mc.addMetric("memory_hugepages_total", "Total number of hugepages", []string{"hostname"})
-	mc.addMetric("memory_hugepages_free", "Free hugepages", []string{"hostname"})
-	mc.addMetric("memory_hugepages_rsvd", "Reserved hugepages", []string{"hostname"})
-	mc.addMetric("memory_hugepages_surp", "Surplus hugepages", []string{"hostname"})
+	mc.AddMetric("memory_total_bytes", "Total memory usage", []string{"hostname"})
+	mc.AddMetric("memory_free_bytes", "Free memory", []string{"hostname"})
+	mc.AddMetric("memory_available_bytes", "available memory", []string{"hostname"})
+	mc.AddMetric("memory_hugepages_total", "Total number of hugepages", []string{"hostname"})
+	mc.AddMetric("memory_hugepages_free", "Free hugepages", []string{"hostname"})
+	mc.AddMetric("memory_hugepages_rsvd", "Reserved hugepages", []string{"hostname"})
+	mc.AddMetric("memory_hugepages_surp", "Surplus hugepages", []string{"hostname"})
 }
 
-func ReportMemoryUsage(mc *MetriclyCollector) {
+func ReportMemoryUsage(mc *collector.MetriclyCollector) {
 	slog.Info("Polling Memory metrics...")
 	memStats, err := readMemoryStats()
 	if err != nil {
@@ -92,43 +98,43 @@ func ReportMemoryUsage(mc *MetriclyCollector) {
 		return
 	}
 
-	mc.updateMetric(
+	mc.UpdateMetric(
 		"memory_total_bytes",
 		float64(memStats.MemTotal),
 		[]string{common.GetHostname()},
 	)
 
-	mc.updateMetric(
+	mc.UpdateMetric(
 		"memory_free_bytes",
 		float64(memStats.MemFree),
 		[]string{common.GetHostname()},
 	)
 
-	mc.updateMetric(
+	mc.UpdateMetric(
 		"memory_available_bytes",
 		float64(memStats.MemAvailabe),
 		[]string{common.GetHostname()},
 	)
 
-	mc.updateMetric(
+	mc.UpdateMetric(
 		"memory_hugepages_total",
 		float64(memStats.HugePagesTotal),
 		[]string{common.GetHostname()},
 	)
 
-	mc.updateMetric(
+	mc.UpdateMetric(
 		"memory_hugepages_free",
 		float64(memStats.HugePagesFree),
 		[]string{common.GetHostname()},
 	)
 
-	mc.updateMetric(
+	mc.UpdateMetric(
 		"memory_hugepages_rsvd",
 		float64(memStats.HugePagesRsvd),
 		[]string{common.GetHostname()},
 	)
 
-	mc.updateMetric(
+	mc.UpdateMetric(
 		"memory_hugepages_surp",
 		float64(memStats.HugePagesSurp),
 		[]string{common.GetHostname()},

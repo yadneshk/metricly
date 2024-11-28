@@ -1,7 +1,10 @@
-package pollster
+package cpu
 
 import (
+	"fmt"
 	"log"
+	collector "metricly/internal/collector"
+	"metricly/pkg/common"
 	"os"
 	"testing"
 	"time"
@@ -120,7 +123,7 @@ cpu0 50 100 150 200 25 30 35 40 45`
 	}()
 	procStat = tmpFile.Name()
 
-	mc := CreateMetricCollector()
+	mc := collector.CreateMetricCollector()
 	RegisterCPUMetrics(mc)
 
 	// Step 5: Capture CPU usage over a mock interval
@@ -138,9 +141,9 @@ cpu0 100 150 200 250 30 35 40 45 50`
 	ReportCpuUsage(mc)
 
 	// Validate metrics
-	if metric, exists := mc.data["metricly_cpu_total"]; exists {
-		if metric.value != 77.27 {
-			t.Errorf("expected cpu_total=77.27, got %f", metric.value)
+	if metric, exists := mc.Data[fmt.Sprintf("cpu_total|%s", common.GetHostname())]; exists {
+		if metric.Value != 77.27 {
+			t.Errorf("expected cpu_total=77.27, got %f", metric.Value)
 		}
 	} else {
 		t.Error("metricly_cpu_total not found in metrics data")
