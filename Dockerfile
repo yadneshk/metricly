@@ -16,4 +16,7 @@ RUN mkdir /etc/metricly
 EXPOSE 8080
 
 # Run the metrics collector
-CMD ["./metricly"]
+ENTRYPOINT ["./metricly"]
+
+# Default agrs
+CMD ["--config", "/etc/metricly/config.yaml"]
