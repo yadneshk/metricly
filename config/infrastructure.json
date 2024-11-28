@@ -727,7 +727,7 @@
           "targets": [
             {
               "editorMode": "code",
-              "expr": "network_rx_bytes_total",
+              "expr": "network_rx_bytes",
               "legendFormat": "{{interface}}",
               "range": true,
               "refId": "A"
@@ -819,7 +819,7 @@
           "targets": [
             {
               "editorMode": "code",
-              "expr": "network_tx_bytes_total",
+              "expr": "network_tx_bytes",
               "legendFormat": "{{interface}}",
               "range": true,
               "refId": "A"
@@ -911,7 +911,7 @@
           "targets": [
             {
               "editorMode": "code",
-              "expr": "network_rx_packets_total",
+              "expr": "network_rx_packets",
               "legendFormat": "{{interface}}",
               "range": true,
               "refId": "A"
@@ -1003,7 +1003,7 @@
           "targets": [
             {
               "editorMode": "code",
-              "expr": "network_tx_packets_total",
+              "expr": "network_tx_packets",
               "legendFormat": "{{interface}}",
               "range": true,
               "refId": "A"
@@ -1095,7 +1095,7 @@
           "targets": [
             {
               "editorMode": "code",
-              "expr": "network_rx_errors_total",
+              "expr": "network_rx_errors",
               "legendFormat": "{{interface}}",
               "range": true,
               "refId": "A"
@@ -1187,7 +1187,7 @@
           "targets": [
             {
               "editorMode": "code",
-              "expr": "network_tx_drops_total",
+              "expr": "network_tx_drops",
               "legendFormat": "{{interface}}",
               "range": true,
               "refId": "A"
@@ -1279,7 +1279,7 @@
           "targets": [
             {
               "editorMode": "code",
-              "expr": "network_rx_drops_total",
+              "expr": "network_rx_drops",
               "legendFormat": "{{interface}}",
               "range": true,
               "refId": "A"
@@ -1371,7 +1371,7 @@
           "targets": [
             {
               "editorMode": "code",
-              "expr": "network_tx_errors_total",
+              "expr": "network_tx_errors",
               "legendFormat": "{{interface}}",
               "range": true,
               "refId": "A"
