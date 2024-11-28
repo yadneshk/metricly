@@ -66,5 +66,5 @@ jobs:
         with:
           context: .
           push: true
-          tags: quay.io/${{ secrets.QUAY_USERNAME }}/metricly:latest
+          tags: ${{ secrets.QUAY_USERNAME }}/metricly:latest
 
