@@ -32,7 +32,7 @@ func readNetworkStats() ([]networkStats, error) {
 	if procNetDevEnv := os.Getenv("PROC_NETWORK_DEV"); procNetDevEnv != "" {
 		procNetDev = procNetDevEnv
 	}
-	slog.Info(procNetDev)
+
 	nwStats, err := os.Open(procNetDev)
 	if err != nil {
 		return []networkStats{}, err
