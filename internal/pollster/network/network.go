@@ -29,10 +29,10 @@ type networkStats struct {
 
 func readNetworkStats() ([]networkStats, error) {
 
-	if procNetDevEnv := os.Getenv("PROC_NETWORK_DEV"); procNetDev != "" {
+	if procNetDevEnv := os.Getenv("PROC_NETWORK_DEV"); procNetDevEnv != "" {
 		procNetDev = procNetDevEnv
 	}
-
+	slog.Info(procNetDev)
 	nwStats, err := os.Open(procNetDev)
 	if err != nil {
 		return []networkStats{}, err
@@ -53,13 +53,13 @@ func readNetworkStats() ([]networkStats, error) {
 		stats = append(stats, networkStats{
 			interfaceName: strings.TrimSuffix(fields[0], ":"),
 			bytesRx:       common.ParseUint(fields[1]),
-			bytesTx:       common.ParseUint(fields[8]),
+			bytesTx:       common.ParseUint(fields[9]),
 			packetsRx:     common.ParseUint(fields[2]),
-			packetsTx:     common.ParseUint(fields[9]),
+			packetsTx:     common.ParseUint(fields[10]),
 			errorsRx:      common.ParseUint(fields[3]),
-			errorsTx:      common.ParseUint(fields[10]),
+			errorsTx:      common.ParseUint(fields[11]),
 			dropsRx:       common.ParseUint(fields[4]),
-			dropsTx:       common.ParseUint(fields[11]),
+			dropsTx:       common.ParseUint(fields[12]),
 		})
 	}
 	return stats, nil
