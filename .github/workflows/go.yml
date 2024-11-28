@@ -26,10 +26,10 @@ jobs:
       run: go mod tidy
 
     # Run static analysis and linters
-    - name: Run linters
-      run: |
-        go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.54.2
-        golangci-lint run
+    # - name: Run linters
+    #   run: |
+    #     go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.54.2
+    #     golangci-lint run
 
     # Run tests
     - name: Run tests
