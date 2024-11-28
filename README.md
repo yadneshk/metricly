@@ -1,11 +1,10 @@
-Here’s a well-structured GitHub README file for the **Metricly** project:
-
----
-
 # **Metricly**
 
 **Metricly** is a Go-based metrics collection framework designed to gather and expose system-level metrics, such as CPU usage, memory usage, disk I/O, network statistics, and more. These metrics are collected and exposed in Prometheus-compatible format for easy monitoring and visualization.
 
+![Sample Metricly dashboard](doc/metricly_dashboard.png)
+![Sample Network dashboard](doc/metricly_network_dashboard.png)
+![Sample Disk dashboard](doc/metricly_disk_dashboard.png)
 ---
 
 ## **Features**
@@ -15,23 +14,22 @@ Here’s a well-structured GitHub README file for the **Metricly** project:
   - Network Throughput
   - Memory Usage
 - **Prometheus Integration**:
-  - Exposes metrics in a format compatible with Prometheus.
+  - Exposes metrics in a format compatible with `Prometheus`.
 - **Configurable**:
   - Customize collection intervals and server settings via YAML configuration or environment variables.
-- **Docker-Compatible**:
+- **Podman-Compatible**:
   - Run Metricly as a containerized service.
-- **Lightweight**:
-  - Minimal resource overhead, suitable for production environments.
 - **Custom Logging**:
   - Logs incoming and outgoing API requests with support for multiple log levels (INFO, DEBUG, ERROR).
-
+- **Metrics Visualization**
+  - Provides an inbuilt `Grafana` dashboard to visualize all metrics.
 ---
 
 ## **Getting Started**
 
 ### **Prerequisites**
 - **Go 1.22+**
-- **Docker** (for containerized deployment)
+- **Podman** (for containerized deployment)
 - **Prometheus** (for metrics scraping)
 
 ---
@@ -98,20 +96,47 @@ debug: false
 
 ---
 
-#### **Docker/Podman Compose Deployment**
-For `podman compose` make sure you have installed `podman-compose` using `pip`
-```
+#### **Podman Compose Deployment**
+Make sure `podman-compose` is installed
+```bash
 pip install podman-compose==1.2.0
 ```
 
 Run `podman compose up`
-```
+```bash
 make run_compose_up
+...
+✔ Container metricly_prometheus  Started 
+✔ Container metricly_metricly    Started
+✔ Container metricly_grafana     Started
 ```
 
-To destroy all containers
+Check containers
+```bash
+podman ps
+CONTAINER ID   IMAGE                    COMMAND                  CREATED         STATUS         PORTS     NAMES
+b6f86fba674e   metricly-metricly        "./metricly --config…"   3 minutes ago   Up 3 minutes             metricly_metricly
+7f97e165d514   grafana/grafana          "/run.sh"                4 minutes ago   Up 3 minutes             metricly_grafana
+5d24779a1af3   prom/prometheus:latest   "/bin/prometheus --c…"   4 minutes ago   Up 3 minutes             metricly_prometheus
 ```
+
+`Grafana` dashboard would be available at `http://127.0.0.1:3000`
+
+Use `admin/admin` to login into dashboard. `Metricly` dashboard is preloaded only in this deployment approach.
+
+
+To destroy all containers
+```bash
 make run_compose_down
+```
+
+**Run with Podman:**
+```bash
+podman build -t metricly .
+podman run --rm -p 8080:8080 --name metricly \
+-v ./config/config.yaml:/etc/metricly/config.yaml:ro \
+-e HOSTNAME=${HOSTNAME} \
+localhost/metricly:latest
 ```
 
 ---
