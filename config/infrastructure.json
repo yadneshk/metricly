@@ -78,7 +78,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -117,7 +118,7 @@
                 "uid": "PBFA97CFB590B2093"
               },
               "editorMode": "code",
-              "expr": "metricly_cpu_total",
+              "expr": "metricly_cpu_total{hostname=\"$host\"}",
               "legendFormat": "{{__name__}}",
               "range": true,
               "refId": "A"
@@ -128,7 +129,7 @@
                 "uid": "PBFA97CFB590B2093"
               },
               "editorMode": "code",
-              "expr": "metricly_cpu_system",
+              "expr": "metricly_cpu_system{hostname=\"$host\"}",
               "hide": false,
               "legendFormat": "{{__name__}}",
               "range": true,
@@ -140,7 +141,7 @@
                 "uid": "PBFA97CFB590B2093"
               },
               "editorMode": "code",
-              "expr": "metricly_cpu_user",
+              "expr": "metricly_cpu_user{hostname=\"$host\"}",
               "hide": false,
               "legendFormat": "{{__name__}}",
               "range": true,
@@ -152,7 +153,7 @@
                 "uid": "PBFA97CFB590B2093"
               },
               "editorMode": "code",
-              "expr": "metricly_cpu_steal",
+              "expr": "metricly_cpu_steal{hostname=\"$host\"}",
               "hide": false,
               "legendFormat": "{{__name__}}",
               "range": true,
@@ -268,10 +269,10 @@
                 "uid": "PBFA97CFB590B2093"
               },
               "editorMode": "code",
-              "expr": "100*(metricly_memory_total_bytes-metricly_memory_available_bytes)/metricly_memory_total_bytes",
+              "expr": "100*(metricly_memory_total_bytes{hostname=\"$host\"}-metricly_memory_available_bytes{hostname=\"$host\"})/metricly_memory_total_bytes{hostname=\"$host\"}",
               "hide": false,
               "instant": false,
-              "legendFormat": "Usage",
+              "legendFormat": "{{hostname}}",
               "range": true,
               "refId": "B"
             }
@@ -363,10 +364,10 @@
                 "uid": "PBFA97CFB590B2093"
               },
               "editorMode": "code",
-              "expr": "(metricly_memory_total_bytes-metricly_memory_available_bytes)/1024/1024/1024",
+              "expr": "(metricly_memory_total_bytes{hostname=\"$host\"}-metricly_memory_available_bytes{hostname=\"$host\"})/1024/1024/1024",
               "hide": false,
               "instant": false,
-              "legendFormat": "Usage",
+              "legendFormat": "{{hostname}}",
               "range": true,
               "refId": "B"
             }
@@ -429,7 +430,7 @@
           "targets": [
             {
               "editorMode": "code",
-              "expr": "metricly_memory_hugepages_total",
+              "expr": "metricly_memory_hugepages_total{hostname=\"$host\"}",
               "legendFormat": "Total",
               "range": true,
               "refId": "A"
@@ -493,7 +494,7 @@
           "targets": [
             {
               "editorMode": "code",
-              "expr": "metricly_memory_hugepages_free",
+              "expr": "metricly_memory_hugepages_free{hostname=\"$host\"}",
               "legendFormat": "Total",
               "range": true,
               "refId": "A"
@@ -557,7 +558,7 @@
           "targets": [
             {
               "editorMode": "code",
-              "expr": "metricly_memory_hugepages_total",
+              "expr": "metricly_memory_hugepages_total{hostname=\"$host\"}",
               "legendFormat": "Total",
               "range": true,
               "refId": "A"
@@ -621,7 +622,7 @@
           "targets": [
             {
               "editorMode": "code",
-              "expr": "metricly_memory_hugepages_surp",
+              "expr": "metricly_memory_hugepages_surp{hostname=\"$host\"}",
               "legendFormat": "Total",
               "range": true,
               "refId": "A"
@@ -692,7 +693,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -708,7 +710,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 12
+            "y": 3
           },
           "id": 8,
           "options": {
@@ -727,7 +729,7 @@
           "targets": [
             {
               "editorMode": "code",
-              "expr": "metricly_network_rx_bytes",
+              "expr": "metricly_network_rx_bytes{hostname=\"$host\"}",
               "legendFormat": "{{interface}}",
               "range": true,
               "refId": "A"
@@ -784,7 +786,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -800,7 +803,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 12
+            "y": 3
           },
           "id": 9,
           "options": {
@@ -819,7 +822,7 @@
           "targets": [
             {
               "editorMode": "code",
-              "expr": "metricly_network_tx_bytes",
+              "expr": "metricly_network_tx_bytes{hostname=\"$host\"}",
               "legendFormat": "{{interface}}",
               "range": true,
               "refId": "A"
@@ -876,7 +879,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -892,7 +896,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 132
+            "y": 11
           },
           "id": 10,
           "options": {
@@ -911,7 +915,7 @@
           "targets": [
             {
               "editorMode": "code",
-              "expr": "metricly_network_rx_packets",
+              "expr": "metricly_network_rx_packets{hostname=\"$host\"}",
               "legendFormat": "{{interface}}",
               "range": true,
               "refId": "A"
@@ -968,7 +972,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -984,7 +989,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 132
+            "y": 11
           },
           "id": 11,
           "options": {
@@ -1003,7 +1008,7 @@
           "targets": [
             {
               "editorMode": "code",
-              "expr": "metricly_network_tx_packets",
+              "expr": "metricly_network_tx_packets{hostname=\"$host\"}",
               "legendFormat": "{{interface}}",
               "range": true,
               "refId": "A"
@@ -1060,7 +1065,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -1076,7 +1082,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 140
+            "y": 19
           },
           "id": 14,
           "options": {
@@ -1095,7 +1101,7 @@
           "targets": [
             {
               "editorMode": "code",
-              "expr": "metricly_network_rx_errors",
+              "expr": "metricly_network_rx_errors{hostname=\"$host\"}",
               "legendFormat": "{{interface}}",
               "range": true,
               "refId": "A"
@@ -1152,7 +1158,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -1168,7 +1175,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 140
+            "y": 19
           },
           "id": 13,
           "options": {
@@ -1187,7 +1194,7 @@
           "targets": [
             {
               "editorMode": "code",
-              "expr": "metricly_network_tx_drops",
+              "expr": "metricly_network_tx_drops{hostname=\"$host\"}",
               "legendFormat": "{{interface}}",
               "range": true,
               "refId": "A"
@@ -1244,7 +1251,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -1260,7 +1268,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 148
+            "y": 27
           },
           "id": 12,
           "options": {
@@ -1336,7 +1344,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -1352,7 +1361,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 148
+            "y": 27
           },
           "id": 15,
           "options": {
@@ -1371,7 +1380,7 @@
           "targets": [
             {
               "editorMode": "code",
-              "expr": "metricly_network_tx_errors",
+              "expr": "metricly_network_tx_errors{hostname=\"$host\"}",
               "legendFormat": "{{interface}}",
               "range": true,
               "refId": "A"
@@ -1478,7 +1487,7 @@
           "targets": [
             {
               "editorMode": "code",
-              "expr": "rate(metricly_disk_read_throughput_bytes[1m])",
+              "expr": "rate(metricly_disk_read_throughput_bytes{hostname=\"$host\"}[1m])",
               "legendFormat": "{{device}}",
               "range": true,
               "refId": "A"
@@ -1571,7 +1580,7 @@
           "targets": [
             {
               "editorMode": "code",
-              "expr": "rate(metricly_disk_write_throughput_bytes[1m])",
+              "expr": "rate(metricly_disk_write_throughput_bytes{hostname=\"$host\"}[1m])",
               "legendFormat": "{{device}}",
               "range": true,
               "refId": "A"
@@ -1663,7 +1672,7 @@
           "targets": [
             {
               "editorMode": "code",
-              "expr": "metricly_disk_io_in_progress",
+              "expr": "metricly_disk_io_in_progress{hostname=\"$host\"}",
               "legendFormat": "{{device}}",
               "range": true,
               "refId": "A"
@@ -1756,7 +1765,7 @@
           "targets": [
             {
               "editorMode": "code",
-              "expr": "metricly_disk_io_time_spent_seconds",
+              "expr": "metricly_disk_io_time_spent_seconds{hostname=\"$host\"}",
               "legendFormat": "{{device}}",
               "range": true,
               "refId": "A"
@@ -1849,7 +1858,7 @@
           "targets": [
             {
               "editorMode": "code",
-              "expr": "metricly_disk_weighted_io_time_seconds",
+              "expr": "metricly_disk_weighted_io_time_seconds{hostname=\"$host\"}",
               "legendFormat": "{{device}}",
               "range": true,
               "refId": "A"
@@ -1956,7 +1965,7 @@
           "targets": [
             {
               "editorMode": "code",
-              "expr": "metricly_metricly_disk_available_bytes/1024/1024/1024",
+              "expr": "metricly_disk_available_bytes{hostname=\"$host\"}/1024/1024/1024",
               "legendFormat": "{{mount_point}}",
               "range": true,
               "refId": "A"
@@ -1975,7 +1984,26 @@
   "schemaVersion": 40,
   "tags": [],
   "templating": {
-    "list": []
+    "list": [
+      {
+        "current": {
+          "text": "fedora",
+          "value": "fedora"
+        },
+        "definition": "label_values(metricly_cpu_steal,hostname)",
+        "label": "host",
+        "name": "host",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(metricly_cpu_steal,hostname)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "type": "query"
+      }
+    ]
   },
   "time": {
     "from": "now-5m",
