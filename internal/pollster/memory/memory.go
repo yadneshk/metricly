@@ -81,13 +81,13 @@ func readMemoryStats() (memoryStats, error) {
 
 func RegisterMemoryMetrics(mc *collector.MetriclyCollector) {
 	// constLabelMap := make(map[string]string)
-	mc.AddMetric("memory_total_bytes", "Total memory usage", []string{"hostname"})
-	mc.AddMetric("memory_free_bytes", "Free memory", []string{"hostname"})
-	mc.AddMetric("memory_available_bytes", "available memory", []string{"hostname"})
-	mc.AddMetric("memory_hugepages_total", "Total number of hugepages", []string{"hostname"})
-	mc.AddMetric("memory_hugepages_free", "Free hugepages", []string{"hostname"})
-	mc.AddMetric("memory_hugepages_rsvd", "Reserved hugepages", []string{"hostname"})
-	mc.AddMetric("memory_hugepages_surp", "Surplus hugepages", []string{"hostname"})
+	mc.AddMetric("memory_total_bytes", "Total memory usage", []string{})
+	mc.AddMetric("memory_free_bytes", "Free memory", []string{})
+	mc.AddMetric("memory_available_bytes", "available memory", []string{})
+	mc.AddMetric("memory_hugepages_total", "Total number of hugepages", []string{})
+	mc.AddMetric("memory_hugepages_free", "Free hugepages", []string{})
+	mc.AddMetric("memory_hugepages_rsvd", "Reserved hugepages", []string{})
+	mc.AddMetric("memory_hugepages_surp", "Surplus hugepages", []string{})
 }
 
 func ReportMemoryUsage(mc *collector.MetriclyCollector) {
@@ -101,43 +101,43 @@ func ReportMemoryUsage(mc *collector.MetriclyCollector) {
 	mc.UpdateMetric(
 		"memory_total_bytes",
 		float64(memStats.MemTotal),
-		[]string{common.GetHostname()},
+		[]string{},
 	)
 
 	mc.UpdateMetric(
 		"memory_free_bytes",
 		float64(memStats.MemFree),
-		[]string{common.GetHostname()},
+		[]string{},
 	)
 
 	mc.UpdateMetric(
 		"memory_available_bytes",
 		float64(memStats.MemAvailabe),
-		[]string{common.GetHostname()},
+		[]string{},
 	)
 
 	mc.UpdateMetric(
 		"memory_hugepages_total",
 		float64(memStats.HugePagesTotal),
-		[]string{common.GetHostname()},
+		[]string{},
 	)
 
 	mc.UpdateMetric(
 		"memory_hugepages_free",
 		float64(memStats.HugePagesFree),
-		[]string{common.GetHostname()},
+		[]string{},
 	)
 
 	mc.UpdateMetric(
 		"memory_hugepages_rsvd",
 		float64(memStats.HugePagesRsvd),
-		[]string{common.GetHostname()},
+		[]string{},
 	)
 
 	mc.UpdateMetric(
 		"memory_hugepages_surp",
 		float64(memStats.HugePagesSurp),
-		[]string{common.GetHostname()},
+		[]string{},
 	)
 	slog.Info("Polling Memory metrics complete")
 }

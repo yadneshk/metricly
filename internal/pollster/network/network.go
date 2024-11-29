@@ -66,14 +66,14 @@ func readNetworkStats() ([]networkStats, error) {
 }
 
 func RegisterNetworkMetrics(mc *collector.MetriclyCollector) {
-	mc.AddMetric("network_rx_bytes", "total bytes received", []string{"hostname", "interface"})
-	mc.AddMetric("network_tx_bytes", "total bytes transmitted", []string{"hostname", "interface"})
-	mc.AddMetric("network_rx_packets", "total packets received", []string{"hostname", "interface"})
-	mc.AddMetric("network_tx_packets", "total packets transmitted", []string{"hostname", "interface"})
-	mc.AddMetric("network_rx_errors", "total errors received", []string{"hostname", "interface"})
-	mc.AddMetric("network_tx_errors", "total errors transmitted", []string{"hostname", "interface"})
-	mc.AddMetric("network_rx_drops", "total drops received", []string{"hostname", "interface"})
-	mc.AddMetric("network_tx_drops", "total drops transmitted", []string{"hostname", "interface"})
+	mc.AddMetric("network_rx_bytes", "total bytes received", []string{"interface"})
+	mc.AddMetric("network_tx_bytes", "total bytes transmitted", []string{"interface"})
+	mc.AddMetric("network_rx_packets", "total packets received", []string{"interface"})
+	mc.AddMetric("network_tx_packets", "total packets transmitted", []string{"interface"})
+	mc.AddMetric("network_rx_errors", "total errors received", []string{"interface"})
+	mc.AddMetric("network_tx_errors", "total errors transmitted", []string{"interface"})
+	mc.AddMetric("network_rx_drops", "total drops received", []string{"interface"})
+	mc.AddMetric("network_tx_drops", "total drops transmitted", []string{"interface"})
 }
 
 func subtractCurrPrev(prev, curr networkStats) networkStats {
@@ -123,49 +123,49 @@ func ReportNetworkUsage(mc *collector.MetriclyCollector) {
 		mc.UpdateMetric(
 			"network_rx_bytes",
 			float64(stat.bytesRx),
-			[]string{common.GetHostname(), stat.interfaceName},
+			[]string{stat.interfaceName},
 		)
 
 		mc.UpdateMetric(
 			"network_tx_bytes",
 			float64(stat.bytesTx),
-			[]string{common.GetHostname(), stat.interfaceName},
+			[]string{stat.interfaceName},
 		)
 
 		mc.UpdateMetric(
 			"network_rx_packets",
 			float64(stat.packetsRx),
-			[]string{common.GetHostname(), stat.interfaceName},
+			[]string{stat.interfaceName},
 		)
 
 		mc.UpdateMetric(
 			"network_tx_packets",
 			float64(stat.packetsTx),
-			[]string{common.GetHostname(), stat.interfaceName},
+			[]string{stat.interfaceName},
 		)
 
 		mc.UpdateMetric(
 			"network_rx_errors",
 			float64(stat.errorsRx),
-			[]string{common.GetHostname(), stat.interfaceName},
+			[]string{stat.interfaceName},
 		)
 
 		mc.UpdateMetric(
 			"network_tx_errors",
 			float64(stat.errorsTx),
-			[]string{common.GetHostname(), stat.interfaceName},
+			[]string{stat.interfaceName},
 		)
 
 		mc.UpdateMetric(
 			"network_rx_drops",
 			float64(stat.dropsRx),
-			[]string{common.GetHostname(), stat.interfaceName},
+			[]string{stat.interfaceName},
 		)
 
 		mc.UpdateMetric(
 			"network_tx_drops",
 			float64(stat.dropsTx),
-			[]string{common.GetHostname(), stat.interfaceName},
+			[]string{stat.interfaceName},
 		)
 	}
 	slog.Info("Polling Network metrics complete")

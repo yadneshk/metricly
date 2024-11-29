@@ -1,10 +1,8 @@
 package memory
 
 import (
-	"fmt"
 	pollster "metricly/internal/collector"
 	helper "metricly/internal/pollster/tests"
-	"metricly/pkg/common"
 	"os"
 	"testing"
 )
@@ -73,43 +71,15 @@ HugePages_Surp:         8`
 	defer os.Remove(collectorSource)
 	procMemInfo = collectorSource
 
-	// Step 4: Create a mock MetriclyCollector
+	// start testing target function
 	mc := pollster.CreateMetricCollector()
 	RegisterMemoryMetrics(mc)
 
-	// Step 5: Call `ReportMemoryUsage` and validate the updated metrics
 	ReportMemoryUsage(mc)
-	// fmt.Println(mc)
-	// Validate the metrics
-	if metric, exists := mc.Data[fmt.Sprintf("memory_total_bytes|%s", common.GetHostname())]; exists {
-		if metric.Value != 16384000*1024 {
-			t.Errorf("expected memory_total_bytes=16384000, got %f", metric.Value)
-		}
-	} else {
-		t.Error("metricly_memory_total_bytes not found in metrics data")
-	}
 
-	if metric, exists := mc.Data[fmt.Sprintf("memory_free_bytes|%s", common.GetHostname())]; exists {
-		if metric.Value != 8192000*1024 {
-			t.Errorf("expected memory_free_bytes=8192000, got %f", metric.Value)
-		}
-	} else {
-		t.Error("memory_free_bytes not found in metrics data")
-	}
+	helper.VerifyMetric(t, mc, "metricly_memory_total_bytes", 16384000*1024)
+	helper.VerifyMetric(t, mc, "metricly_memory_free_bytes", 8192000*1024)
+	helper.VerifyMetric(t, mc, "metricly_memory_available_bytes", 12288000*1024)
+	helper.VerifyMetric(t, mc, "metricly_memory_hugepages_total", 64)
 
-	if metric, exists := mc.Data[fmt.Sprintf("memory_available_bytes|%s", common.GetHostname())]; exists {
-		if metric.Value != 12288000*1024 {
-			t.Errorf("expected memory_available_bytes=12288000, got %f", metric.Value)
-		}
-	} else {
-		t.Error("memory_available_bytes not found in metrics data")
-	}
-
-	if metric, exists := mc.Data[fmt.Sprintf("memory_hugepages_total|%s", common.GetHostname())]; exists {
-		if metric.Value != 64 {
-			t.Errorf("expected memory_hugepages_total=64, got %f", metric.Value)
-		}
-	} else {
-		t.Error("memory_hugepages_total not found in metrics data")
-	}
 }

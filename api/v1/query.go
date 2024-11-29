@@ -82,7 +82,10 @@ func PrometheusQueryHandler(conf *config.Config) http.HandlerFunc {
 		}
 		w.WriteHeader(http.StatusOK)
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(response)
-
+		err = json.NewEncoder(w).Encode(response)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("failed to encode response: %s", err), http.StatusInternalServerError)
+			return
+		}
 	}
 }

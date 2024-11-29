@@ -1,35 +1,27 @@
 package cpu
 
 import (
-	"fmt"
 	"log"
 	collector "metricly/internal/collector"
-	"metricly/pkg/common"
+	helper "metricly/internal/pollster/tests"
 	"os"
 	"testing"
 	"time"
 )
 
 func TestReadCpuStats(t *testing.T) {
-	tmpFile, err := os.Create("cpustats.txt")
-	if err != nil {
-		t.Fatalf("failed to create temp file: %v", err)
-	}
-	defer os.Remove((tmpFile.Name()))
+	collectorSource := "cpustat.txt"
 
-	mockCpuStats := `cpu  2255 34 2290 22625563 6290 127 456 0 0 0
+	mntContent := `cpu  2255 34 2290 22625563 6290 127 456 0 0 0
 cpu0 1132 17 1145 11312780 3154 63 228 0 0 0
 cpu1 1123 17 1145 11312783 3154 63 228 0 0 0`
 
-	if _, err := tmpFile.WriteString(mockCpuStats); err != nil {
-		t.Fatalf("failed to write to temp file: %v", err)
+	err := helper.SetupCollectorSources(collectorSource, mntContent)
+	if err != nil {
+		t.Fatalf("failed to setup collector file: %v", err)
 	}
-	tmpFile.Close()
-	originalProcStat := procStat
-	defer func() {
-		procStat = originalProcStat
-	}()
-	procStat = tmpFile.Name()
+	defer os.Remove(collectorSource)
+	procStat = collectorSource
 
 	cpuStats, err := readCPUStats()
 	if err != nil {
@@ -104,29 +96,20 @@ func TestCalculateCPUUsage(t *testing.T) {
 }
 
 func TestReportCpuUsage(t *testing.T) {
-	tmpFile, err := os.Create("cpustats.txt")
-	if err != nil {
-		t.Fatalf("failed to create temp file: %v", err)
-	}
-	defer os.Remove((tmpFile.Name()))
+	collectorSource := "cpustats.txt"
 
-	mockCpuStats := `cpu  100 200 300 400 50 60 70 80 90
+	mntContent := `cpu  100 200 300 400 50 60 70 80 90
 cpu0 50 100 150 200 25 30 35 40 45`
 
-	if _, err := tmpFile.WriteString(mockCpuStats); err != nil {
-		t.Fatalf("failed to write to temp file: %v", err)
+	err := helper.SetupCollectorSources(collectorSource, mntContent)
+	if err != nil {
+		t.Fatalf("failed to setup collector file: %v", err)
 	}
-	tmpFile.Close()
-	originalProcStat := procStat
-	defer func() {
-		procStat = originalProcStat
-	}()
-	procStat = tmpFile.Name()
-
+	defer os.Remove(collectorSource)
+	procStat = collectorSource
 	mc := collector.CreateMetricCollector()
 	RegisterCPUMetrics(mc)
 
-	// Step 5: Capture CPU usage over a mock interval
 	go func() {
 		time.Sleep(5 * time.Second)
 		fi, _ := os.OpenFile("cpustats.txt", os.O_WRONLY|os.O_TRUNC, 0644)
@@ -140,12 +123,8 @@ cpu0 100 150 200 250 30 35 40 45 50`
 
 	ReportCpuUsage(mc)
 
-	// Validate metrics
-	if metric, exists := mc.Data[fmt.Sprintf("cpu_total|%s", common.GetHostname())]; exists {
-		if metric.Value != 77.27 {
-			t.Errorf("expected cpu_total=77.27, got %f", metric.Value)
-		}
-	} else {
-		t.Error("metricly_cpu_total not found in metrics data")
-	}
+	helper.VerifyMetric(t, mc, "metricly_cpu_total", 77.27)
+	helper.VerifyMetric(t, mc, "metricly_cpu_system", 22.72)
+	helper.VerifyMetric(t, mc, "metricly_cpu_user", 22.72)
+	helper.VerifyMetric(t, mc, "metricly_cpu_steal", 2.27)
 }

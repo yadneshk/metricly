@@ -1,11 +1,9 @@
 package network
 
 import (
-	"fmt"
 	"log"
 	pollster "metricly/internal/collector"
 	helper "metricly/internal/pollster/tests"
-	"metricly/pkg/common"
 	"os"
 	"testing"
 	"time"
@@ -58,7 +56,7 @@ wlp0s20f3: 6540158835 5786650    0    2    0     0          0         0 14211006
 	if err != nil {
 		t.Fatalf("failed to setup collector file: %v", err)
 	}
-	// defer os.Remove(collectorSource)
+	defer os.Remove(collectorSource)
 	procNetDev = collectorSource
 
 	mc := pollster.CreateMetricCollector()
@@ -78,17 +76,7 @@ wlp0s20f3: 6540158835 5786650    0    2    0     0          0         0 14211006
 	}()
 	ReportNetworkUsage(mc)
 
-	if metric, exists := mc.Data[fmt.Sprintf("network_rx_bytes_total|%s|wlp0s20f3", common.GetHostname())]; exists {
-		if metric.Value != 100 {
-			t.Errorf("expected metric network_rx_bytes_total=100, got %f", metric.Value)
-		}
-	}
-
-	if metric, exists := mc.Data[fmt.Sprintf("network_rx_errors_total|%s|wlp0s20f3", common.GetHostname())]; exists {
-		if metric.Value != 2 {
-			t.Errorf("expected metric network_rx_errors_total=2, got %f", metric.Value)
-		}
-
-	}
+	helper.VerifyMetric(t, mc, "metricly_network_rx_bytes|wlp0s20f3", 100)
+	helper.VerifyMetric(t, mc, "metricly_network_rx_errors|wlp0s20f3", 2)
 
 }

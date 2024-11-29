@@ -3,6 +3,7 @@ package pollster
 import (
 	"fmt"
 	"log/slog"
+	"metricly/pkg/common"
 	"strings"
 	"sync"
 
@@ -64,14 +65,14 @@ func (mc *MetriclyCollector) AddMetric(name string, description string, labels [
 	defer mc.Mutex.Unlock()
 
 	// prepend exporter name to every metric name
-	// name = fmt.Sprintf("metricly_%s", name)
+	name = fmt.Sprintf("metricly_%s", name)
 
 	// if _, exists := mc.metrics[name]; !exists {
 	mc.Metrics[name] = prometheus.NewDesc(
 		name,
 		description,
 		labels,
-		nil,
+		prometheus.Labels{"hostname": common.GetHostname()},
 	)
 	slog.Debug(fmt.Sprintf("Adding metric %s to registry %T\n", name, prometheus.DefaultRegisterer))
 	// }
@@ -90,9 +91,11 @@ func (mc *MetriclyCollector) UpdateMetric(name string, value float64, labels []s
 	}
 
 	// prepend exporter name to every metric name
-	// name = fmt.Sprintf("metricly_%s", name)
+	name = fmt.Sprintf("metricly_%s", name)
 
 	// if _, exists := mc.metrics[name]; exists {
+	// labels = append(labels, common.GetHostname())
+
 	mc.Data[name] = metricData{
 		Value:  value,
 		Labels: labels,
