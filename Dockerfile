@@ -8,7 +8,7 @@ RUN go mod tidy
 RUN CGO_ENABLED=0 GOOS=linux go build -o metricly cmd/collector/main.go
 
 # # Use a minimal base image for the final image
-FROM alpine:latest
+FROM quay.io/jitesoft/alpine:3.20.3
 WORKDIR /root
 COPY --from=builder /app/metricly .
 RUN mkdir /etc/metricly

@@ -23,7 +23,7 @@ run: build
 .PHONY: run_compose_up
 run_compose_up:
 	@echo "Deploying containers using Podman Compose..."
-	podman compose -f $(COMPOSE_FILE) up --build -d --no-cache
+	podman-compose -f $(COMPOSE_FILE) up --build -d --no-cache
 
 # Stop and clean up the containers
 .PHONY: run_compose_down
