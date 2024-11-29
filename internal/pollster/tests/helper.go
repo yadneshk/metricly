@@ -2,7 +2,9 @@ package tests
 
 import (
 	"fmt"
+	collector "metricly/internal/collector"
 	"os"
+	"testing"
 )
 
 func SetupCollectorSources(fileName, fileContent string) error {
@@ -18,4 +20,16 @@ func SetupCollectorSources(fileName, fileContent string) error {
 	colltrFile.Close()
 
 	return nil
+}
+
+func VerifyMetric(t *testing.T, mc *collector.MetriclyCollector, metricName string, metricValue float64) {
+
+	// Validate metrics
+	if metric, exists := mc.Data[metricName]; exists {
+		if metric.Value != metricValue {
+			t.Fatalf("expected %s=%f, got %f", metricName, metricValue, metric.Value)
+		}
+	} else {
+		t.Fatalf("%s not found in metrics data", metricName)
+	}
 }

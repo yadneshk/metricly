@@ -129,10 +129,10 @@ func calculateStealUsage(prev, curr cpuUsage) float64 {
 }
 
 func RegisterCPUMetrics(mc *collector.MetriclyCollector) {
-	mc.AddMetric("cpu_total", "CPU usage percentage", []string{"hostname"})
-	mc.AddMetric("cpu_user", "User process CPU usage percentage", []string{"hostname"})
-	mc.AddMetric("cpu_system", "System process CPU usage percentage", []string{"hostname"})
-	mc.AddMetric("cpu_steal", "CPU steal percentage", []string{"hostname"})
+	mc.AddMetric("cpu_total", "CPU usage percentage", []string{})
+	mc.AddMetric("cpu_user", "User process CPU usage percentage", []string{})
+	mc.AddMetric("cpu_system", "System process CPU usage percentage", []string{})
+	mc.AddMetric("cpu_steal", "CPU steal percentage", []string{})
 }
 
 // collectCPUUsage collects the CPU usage as a percentage over a defined time interval.
@@ -147,10 +147,10 @@ func ReportCpuUsage(mc *collector.MetriclyCollector) {
 	// Capture current CPU stats
 	currCPU, _ := readCPUStats()
 
-	mc.UpdateMetric("cpu_total", calculateTotalUsage(prevCPU, currCPU), []string{common.GetHostname()})
-	mc.UpdateMetric("cpu_user", calculateUserUsage(prevCPU, currCPU), []string{common.GetHostname()})
-	mc.UpdateMetric("cpu_system", calculateSystemUsage(prevCPU, currCPU), []string{common.GetHostname()})
-	mc.UpdateMetric("cpu_steal", calculateStealUsage(prevCPU, currCPU), []string{common.GetHostname()})
+	mc.UpdateMetric("cpu_total", calculateTotalUsage(prevCPU, currCPU), []string{})
+	mc.UpdateMetric("cpu_user", calculateUserUsage(prevCPU, currCPU), []string{})
+	mc.UpdateMetric("cpu_system", calculateSystemUsage(prevCPU, currCPU), []string{})
+	mc.UpdateMetric("cpu_steal", calculateStealUsage(prevCPU, currCPU), []string{})
 
 	slog.Info("Polling CPU metrics complete")
 }

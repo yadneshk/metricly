@@ -75,14 +75,8 @@ func TestParseDiskStats(t *testing.T) {
 	RegisterDiskMetrics(mc)
 	ReportDiskUsage(mc)
 
-	if metric, ok := mc.Data["disk_reads_completed_total|sda"]; !ok || metric.Value != 157698 {
-		t.Errorf("unexpected value for disk_reads_completed_total: got %v, want %v", metric.Value, 157698)
-	}
-	if metric, ok := mc.Data["disk_io_in_progress|sda1"]; !ok || metric.Value != 0 {
-		t.Errorf("unexpected value for disk_reads_completed_total: got %v, want %v", metric.Value, 0)
-	}
-	if metric, ok := mc.Data["disk_read_throughput_bytes|sdb"]; !ok || metric.Value != 1053049856 {
-		t.Errorf("unexpected value for disk_reads_completed_total: got %v, want %v", metric.Value, 1053049856)
-	}
+	helper.VerifyMetric(t, mc, "metricly_disk_reads_completed_total|sda", 157698)
+	helper.VerifyMetric(t, mc, "metricly_disk_io_in_progress|sda1", 0)
+	helper.VerifyMetric(t, mc, "metricly_disk_read_throughput_bytes|sdb", 1053049856)
 
 }
