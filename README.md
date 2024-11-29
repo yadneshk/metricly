@@ -138,7 +138,7 @@ $ make run_compose_down
 **Run with Podman:**
 ```bash
 $ podman build -t metricly .
-$ podman run --rm -p 8080:8080 --name metricly \
+$ podman run --rm -d -p 8080:8080 --name metricly \
 -v ./config/config.yaml:/etc/metricly/config.yaml:ro \
 -e HOSTNAME=${HOSTNAME} \
 localhost/metricly:latest
