@@ -5,14 +5,16 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: always
+    ports:
+      - 8080:8080    
     volumes:
-      - ./config/config.yaml:/etc/metricly/config.yaml:ro
+      - ./config/config.yaml:/etc/metricly/config.yaml:ro,z
       # - /proc/stat:/proc/stat:ro
       # - /proc/meminfo:/proc/meminfo:ro
       # - /proc/diskstats:/proc/diskstats:ro
       # - /proc/net/dev:/mnt/metricly/dev:ro
       # - /proc/self/mounts:/mnt/metricly/mounts:ro
-      - /:/host/root:ro
+      - /:/host/root:ro,rslave # Changes in the source (host) are reflected in the container, not vice-versa
     environment:
       - HOSTNAME=${HOSTNAME}
       - PROC_CPU_STAT=/host/root/proc/stat
@@ -20,28 +22,34 @@ services:
       - PROC_NETWORK_DEV=/host/root/proc/net/dev
       - PROC_DISK_MOUNTS=/host/root/proc/mounts
       - PROC_DISK_STATS=/host/root/proc/diskstats
-    network_mode: host
 
   prometheus:
     container_name: metricly_prometheus
-    image: prom/prometheus:latest
+    image: quay.io/prometheus/prometheus:v2.36.2
+    ports:
+      - 9090:9090    
     volumes:
-      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-    network_mode: host
+      - ./config/prometheus/:/etc/prometheus/:ro,z
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'      
     restart: always
     depends_on:
       - metricly
 
   grafana:
     container_name: metricly_grafana
-    image: grafana/grafana
+    image: docker.io/grafana/grafana:11.3.1
+    ports:
+      - 3000:3000
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
     volumes:
-      - ./config/grafana/provisioning/:/etc/grafana/provisioning/:ro
-      - ./config/infrastructure.json:/var/lib/grafana/dashboards/infrastructure.json:ro
-    network_mode: host
+      - ./config/grafana/provisioning/:/etc/grafana/provisioning/:ro,z
+      - ./config/infrastructure.json:/var/lib/grafana/dashboards/infrastructure.json:ro,z
     restart: always
     depends_on:
       - prometheus

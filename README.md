@@ -28,7 +28,7 @@
 ## **Getting Started**
 
 ### **Prerequisites**
-- **Go 1.22+**
+- **Go 1.23+**
 - **Podman** (for containerized deployment)
 - **Prometheus** (for metrics scraping)
 
@@ -38,25 +38,25 @@
 
 #### Clone the repository:
 ```bash
-git clone https://github.com/yadneshk/metricly.git
-cd metricly
+$ git clone https://github.com/yadneshk/metricly.git
+$ cd metricly
 ```
 
 #### Build the binary:
 ```bash
-go build -o metricly cmd/collector/main.go
-./metricly --config /path/to/config.yaml
+$ go build -o metricly cmd/collector/main.go
+$ ./metricly --config /path/to/config.yaml
 ```
 OR
 #### Use Makefile to build
 ```bash
-make build
-./build/metricly --config /path/to/config.yaml
+$ make build
+$ ./build/metricly --config /path/to/config.yaml
 ```
 OR
 #### Use Makefile to build and run
 ```bash
-make run CONFIG_FILE=/path/to/config.yaml
+$ make run CONFIG_FILE=/path/to/config.yaml
 ```
 ---
 
@@ -97,14 +97,19 @@ debug: false
 ---
 
 #### **Podman Compose Deployment**
-Make sure `podman-compose` is installed
+Users of Fedora 36 and later can use the dnf package manager to install podman-compose like so:
 ```bash
-pip install podman-compose==1.2.0
+$ sudo dnf install podman-compose
+```
+```bash
+$ podman-compose --version
+podman-compose version 1.2.0
+podman version 5.3.1
 ```
 
-Run `podman compose up`
+Running `run_compose_up` deploys `Metricly`, `Prometheus` and `Grafana`
 ```bash
-make run_compose_up
+$ make run_compose_up
 ...
 ✔ Container metricly_prometheus  Started 
 ✔ Container metricly_metricly    Started
@@ -113,7 +118,7 @@ make run_compose_up
 
 Check containers
 ```bash
-podman ps
+$ podman ps
 CONTAINER ID   IMAGE                    COMMAND                  CREATED         STATUS         PORTS     NAMES
 b6f86fba674e   metricly-metricly        "./metricly --config…"   3 minutes ago   Up 3 minutes             metricly_metricly
 7f97e165d514   grafana/grafana          "/run.sh"                4 minutes ago   Up 3 minutes             metricly_grafana
@@ -122,22 +127,24 @@ b6f86fba674e   metricly-metricly        "./metricly --config…"   3 minutes ago
 
 `Grafana` dashboard would be available at `http://127.0.0.1:3000`
 
-Use `admin/admin` to login into dashboard. `Metricly` dashboard is preloaded only in this deployment approach.
+Use `admin/admin` to login into dashboard. `Metricly` dashboard comes preloaded only in this deployment approach.
 
 
 To destroy all containers
 ```bash
-make run_compose_down
+$ make run_compose_down
 ```
 
 **Run with Podman:**
 ```bash
-podman build -t metricly .
-podman run --rm -p 8080:8080 --name metricly \
+$ podman build -t metricly .
+$ podman run --rm -p 8080:8080 --name metricly \
 -v ./config/config.yaml:/etc/metricly/config.yaml:ro \
 -e HOSTNAME=${HOSTNAME} \
 localhost/metricly:latest
 ```
+
+Prebuilt images with latest commits are pushed to [Quay](https://quay.io/repository/yadneshk/metricly?tab=tags).
 
 ---
 
@@ -178,12 +185,44 @@ localhost/metricly:latest
 
 ---
 
+### APIs Exposed ###
+
+The Metricly exporter provides the following API endpoints:
+1. Metrics
+    - Path: `/metrics`
+    - Method: `GET`
+    - Description: Returns the metrics collected by the exporter in Prometheus format.
+    - Example:
+      ```bash
+      $ curl http://localhost:8080/api/v1/metrics
+      ```
+
+2. Query
+    - Path: `/query`
+    - Method: `GET`
+    - Description: Provides a simple health check to verify the exporter is running.
+    - Response: Returns `200` if the service is operational.
+    - Example:
+      ```bash
+      $ curl http://localhost:8080/api/v1/query?metric=metricly_cpu_total
+      ```
+
+3. Debug API
+
+    Path: /debug
+    Method: GET
+    Description: Outputs debug information, such as current configuration, active metrics, and runtime details.
+    Example:
+
+curl http://localhost:8080/debug
+
+
 ### **Development**
 
 #### **Testing**
 Run unit tests:
 ```bash
-go test ./...
+$ go test ./...
 ```
 
 #### **Logging**
