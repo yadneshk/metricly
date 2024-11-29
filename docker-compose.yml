@@ -5,10 +5,9 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: always
-    ports:
-      - 8080:8080    
+    network_mode: host
     volumes:
-      - ./config/config.yaml:/etc/metricly/config.yaml:ro,z
+      - ./config/config.yaml:/etc/metricly/config.yaml:ro
       # - /proc/stat:/proc/stat:ro
       # - /proc/meminfo:/proc/meminfo:ro
       # - /proc/diskstats:/proc/diskstats:ro
@@ -26,8 +25,7 @@ services:
   prometheus:
     container_name: metricly_prometheus
     image: quay.io/prometheus/prometheus:v2.36.2
-    ports:
-      - 9090:9090    
+    network_mode: host
     volumes:
       - ./config/prometheus/:/etc/prometheus/:ro,z
     command:
@@ -42,8 +40,7 @@ services:
   grafana:
     container_name: metricly_grafana
     image: docker.io/grafana/grafana:11.3.1
-    ports:
-      - 3000:3000
+    network_mode: host
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
