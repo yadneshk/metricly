@@ -189,33 +189,186 @@ Prebuilt images with latest commits are pushed to [Quay](https://quay.io/reposit
 
 The Metricly exporter provides the following API endpoints:
 1. Metrics
-    - Path: `/metrics`
+    - Path: `/api/v1/metrics`
     - Method: `GET`
     - Description: Returns the metrics collected by the exporter in Prometheus format.
-    - Example:
+    - Example: Get all metrics exposed
       ```bash
       $ curl http://localhost:8080/api/v1/metrics
+      metricly_cpu_steal{hostname="fedora"} 0
+      metricly_cpu_system{hostname="fedora"} 4.76
+      metricly_cpu_total{hostname="fedora"} 13.22
+      metricly_cpu_user{hostname="fedora"} 7.41
+      metricly_disk_available_bytes{hostname="fedora",mount_point="/"} 4.66716291072e+11
       ```
 
 2. Query
-    - Path: `/query`
+    - Path: `/api/v1/query`
     - Method: `GET`
     - Description: Provides a simple health check to verify the exporter is running.
-    - Response: Returns `200` if the service is operational.
-    - Example:
+    - Request Parameters
+        | **Parameter** | **Type**  | **Required**  | **Description** |  **Example Value**   |
+        |---------------|-----------|---------------|-----------------|----------------------|
+        |    `metric`   | `string`  |    Yes        |   Metric Name   | `metricly_cpu_total` |
+        |   `timestamp` | `unix_timestamp`  |    No         |   Metric at specific timestamp   | `2024-11-29T12:25:27Z` |
+    - Example: Find current CPU utilization
       ```bash
       $ curl http://localhost:8080/api/v1/query?metric=metricly_cpu_total
+      {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "__name__": "metricly_cpu_total",
+                "hostname": "fedora",
+                "instance": "127.0.0.1:8080",
+                "job": "metricly"
+              },
+              "value": [
+                1732883589.795,
+                "17.94"
+              ]
+            }
+          ]
+        }
+      }
+      ```
+    - Example: Find CPU utilization at a specific timestamp
+      ```bash
+      $ curl http://localhost:8080/api/v1/query?metric=metricly_cpu_total&timestamp=2024-11-29T12:25:27Z
+      {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "__name__": "metricly_cpu_total",
+                "hostname": "fedora",
+                "instance": "127.0.0.1:8080",
+                "job": "metricly"
+              },
+              "value": [
+                1732883127,
+                "28.41"
+              ]
+            }
+          ]
+        }
+      }    
       ```
 
-3. Debug API
+3. Query Range
+    - Path: `/api/v1/query_range`
+    - Method: `GET`
+    - Description: Query metrics over a specific range of time.
+    - Request Parameters
+        | **Parameter** | **Type**  | **Required**  | **Description** |  **Example Value**   |
+        |---------------|-----------|---------------|-----------------|----------------------|
+        |  `metric`     | `string`  |    Yes        |   Metric Name   | `metricly_cpu_total` |
+        |   `start`     | `unix_timestamp`  |    Yes        |   Start timestamp   | `2024-11-29T12:25:27Z` |
+        |   `end`       | `unix_timestamp`  |    Yes        |   End timestamp   | `2024-11-29T12:25:27Z` |    
+        |   `step`      | `seconds`  |    Yes        |   Query resolution step width   | `15s` |    
+    - Example: Find CPU utilization in 15 minute window by specifying `start` and `end` timestamps
+      ```bash
+      $ curl http://127.0.0.1:8080/api/v1/query_range?metric=metricly_cpu_total&start=2024-11-29T12:25:00Z&end=2024-11-29T12:40:00Z&step=15s
+      {
+        "status": "success",
+        "data": {
+          "resultType": "matrix",
+          "result": [
+            {
+              "metric": {
+                "__name__": "metricly_cpu_total",
+                "hostname": "fedora",
+                "instance": "127.0.0.1:8080",
+                "job": "metricly"
+              },
+              "values": [
+                [
+                  1732883100,
+                  "13.1"
+                ],
+                [
+                  1732883115,
+                  "14.84"
+                ],
+                [
+                  1732883130,
+                  "28.41"
+                ],
+                .
+                .
+                .
+                [
+                  1732884000,
+                  "14.84"
+                ]
+              ]
+            }
+          ]
+        }
+      }
+      ```
 
-    Path: /debug
-    Method: GET
-    Description: Outputs debug information, such as current configuration, active metrics, and runtime details.
-    Example:
-
-curl http://localhost:8080/debug
-
+4. Aggregate
+    - Path: `/api/v1/aggregate`
+    - Method: `GET`
+    - Description: Aggregate metrics over time using mathematical operations.
+    - Request Parameters
+        | **Parameter** | **Type**  | **Required**  | **Description** |  **Example Value**   |
+        |---------------|-----------|---------------|-----------------|----------------------|
+        |  `metric`     | `string`  |    Yes        |   Metric Name   | `metricly_cpu_total` |
+        |  `operation`  | `string`  |    Yes        |   Aggregation operation   | `avg`, `max`,`min` |
+        |   `window`    | `duration` |    Yes        |   End timestamp   | `d`,`h`,`m`, `ms`, `s`, `w`, `y` |
+    - Example: Find average CPU utilization in the last 2 hours.
+      ```bash
+      $ curl http://127.0.0.1:8080/api/v1/aggregate?metric=metricly_cpu_total&operation=avg&window=2h
+      {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "hostname": "fedora",
+                "instance": "127.0.0.1:8080",
+                "job": "metricly"
+              },
+              "value": [
+                1732886126.191,
+                "17.223917274939144"
+              ]
+            }
+          ]
+        }
+      }      
+      ```
+    - Example: Find the maximum CPU utilization in the last 2 hours.
+      ```bash
+      $ curl http://127.0.0.1:8080/api/v1/aggregate?metric=metricly_cpu_total&operation=max&window=2h
+      {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "hostname": "fedora",
+                "instance": "127.0.0.1:8080",
+                "job": "metricly"
+              },
+              "value": [
+                1732886765.71,
+                "84.05"
+              ]
+            }
+          ]
+        }
+      }
+      ```      
 
 ### **Development**
 
