@@ -21,6 +21,12 @@ services:
       - PROC_NETWORK_DEV=/host/root/proc/net/dev
       - PROC_DISK_MOUNTS=/host/root/proc/mounts
       - PROC_DISK_STATS=/host/root/proc/diskstats
+    healthcheck:
+      test: ["CMD", "/root/healthcheck metricly"]
+      interval: 30s   
+      timeout: 5s     
+      retries: 3      
+      start_period: 10s 
 
   prometheus:
     container_name: metricly_prometheus

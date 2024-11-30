@@ -1,0 +1,3 @@
+#!/bin/sh
+
+ss -lnp | grep $1 || netstat -plnt | grep -i listen | grep $1

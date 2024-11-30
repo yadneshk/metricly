@@ -8,6 +8,7 @@ import (
 	"metricly/pkg/common"
 	"os"
 	"strings"
+	"time"
 )
 
 var (
@@ -91,7 +92,7 @@ func RegisterMemoryMetrics(mc *collector.MetriclyCollector) {
 }
 
 func ReportMemoryUsage(mc *collector.MetriclyCollector) {
-	slog.Info("Polling Memory metrics...")
+	start := time.Now()
 	memStats, err := readMemoryStats()
 	if err != nil {
 		slog.Warn(fmt.Sprint(err))
@@ -139,5 +140,5 @@ func ReportMemoryUsage(mc *collector.MetriclyCollector) {
 		float64(memStats.HugePagesSurp),
 		[]string{},
 	)
-	slog.Info("Polling Memory metrics complete")
+	slog.Info(fmt.Sprintf("Collected Memory metrics in %s", time.Since(start)))
 }

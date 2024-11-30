@@ -28,17 +28,14 @@ func main() {
 	cc := collector.CreateMetricCollector()
 	prometheus.MustRegister(cc)
 
-	// Context for clean shutdown
+	// Context for clean shutdown (parent ctx)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	// Start metrics collection
+	// Start metrics collection before starting server
 	server.StartMetricsCollection(ctx, config.CollectionInterval, cc)
 
-	err = server.StartServer(config)
-
-	if err != nil {
-		slog.Error(fmt.Sprintf("Failed to start server: %v", err))
-	}
+	// Start metricly metrics hosting server
+	server.StartMetriclyServer(ctx, config)
 
 }

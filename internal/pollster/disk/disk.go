@@ -9,6 +9,7 @@ import (
 	"os"
 	"strings"
 	"syscall"
+	"time"
 )
 
 var (
@@ -181,7 +182,7 @@ func RegisterDiskMetrics(mc *collector.MetriclyCollector) {
 
 // ReportDiskMetrics reports disk metrics periodically.
 func ReportDiskUsage(mc *collector.MetriclyCollector) {
-	slog.Info("Polling Disk metrics...")
+	start := time.Now()
 	// get disk I/O usage
 	diskStatsMap, err := parseDiskStats()
 	if err != nil {
@@ -267,5 +268,5 @@ func ReportDiskUsage(mc *collector.MetriclyCollector) {
 			[]string{mount},
 		)
 	}
-	slog.Info("Polling CPU metrics complete")
+	slog.Info(fmt.Sprintf("Collected Disk metrics in %s", time.Since(start)))
 }

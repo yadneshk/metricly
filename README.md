@@ -141,6 +141,7 @@ $ podman build -t metricly .
 $ podman run --rm -d -p 8080:8080 --name metricly \
 -v ./config/config.yaml:/etc/metricly/config.yaml:ro \
 -e HOSTNAME=${HOSTNAME} \
+--health-cmd "/root/healthcheck metricly" \
 localhost/metricly:latest
 ```
 

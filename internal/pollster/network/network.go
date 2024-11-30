@@ -107,7 +107,7 @@ func calculatePerSecondMetrics(prev, curr []networkStats) ([]networkStats, error
 
 func ReportNetworkUsage(mc *collector.MetriclyCollector) {
 
-	slog.Info("Polling Network metrics...")
+	start := time.Now()
 	prevNWStat, _ := readNetworkStats()
 	time.Sleep(1 * time.Second)
 	currNWStat, _ := readNetworkStats()
@@ -168,5 +168,5 @@ func ReportNetworkUsage(mc *collector.MetriclyCollector) {
 			[]string{stat.interfaceName},
 		)
 	}
-	slog.Info("Polling Network metrics complete")
+	slog.Info(fmt.Sprintf("Collected Network metrics in %s", time.Since(start)))
 }
