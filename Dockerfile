@@ -11,6 +11,8 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o metricly cmd/collector/main.go
 FROM quay.io/jitesoft/alpine:3.20.3
 WORKDIR /root
 COPY --from=builder /app/metricly .
+COPY ./config/healthcheck .
+RUN chmod +x /root/healthcheck
 RUN mkdir /etc/metricly
 # Expose the port
 EXPOSE 8080

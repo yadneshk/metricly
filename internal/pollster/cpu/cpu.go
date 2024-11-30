@@ -137,7 +137,7 @@ func RegisterCPUMetrics(mc *collector.MetriclyCollector) {
 
 // collectCPUUsage collects the CPU usage as a percentage over a defined time interval.
 func ReportCpuUsage(mc *collector.MetriclyCollector) {
-	slog.Info("Polling CPU metrics...")
+	start := time.Now()
 
 	// Capture initial CPU stats
 	prevCPU, _ := readCPUStats()
@@ -152,5 +152,5 @@ func ReportCpuUsage(mc *collector.MetriclyCollector) {
 	mc.UpdateMetric("cpu_system", calculateSystemUsage(prevCPU, currCPU), []string{})
 	mc.UpdateMetric("cpu_steal", calculateStealUsage(prevCPU, currCPU), []string{})
 
-	slog.Info("Polling CPU metrics complete")
+	slog.Info(fmt.Sprintf("Collected CPU metrics in %s", time.Since(start)))
 }
