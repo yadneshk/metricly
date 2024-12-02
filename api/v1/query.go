@@ -38,6 +38,10 @@ import (
 	"net/http"
 )
 
+var (
+	queryEndpoint = "query"
+)
+
 // represents the structure of the reponse Prometheus's API call
 type PrometheusQueryResponse struct {
 	Status string `json:"status"`
@@ -55,20 +59,25 @@ func PrometheusQueryHandler(conf *config.Config) http.HandlerFunc {
 
 		requestParams := r.URL.Query()
 
+		// required
 		metricName := requestParams.Get("metric")
-		time := requestParams.Get("timestamp")
-
-		queryBuilder := prometheus.QueryBuilder{
-			BaseURL: fmt.Sprintf("%s:%s", conf.Prometheus.Address, conf.Prometheus.Port),
-		}
-
-		query, err := queryBuilder.BuildQuery(metricName, time)
-		if err != nil {
-			http.Error(w, fmt.Sprintf("failed to build aggregate query %v", err), http.StatusBadRequest)
+		if metricName == "" {
+			http.Error(w, "metric name cannot be empty", http.StatusBadRequest)
 			return
 		}
 
-		promURL, err := queryBuilder.BuildPrometheusURL(query, "query")
+		// optional
+		time := requestParams.Get("timestamp")
+
+		baseQuery, _ := prometheus.NewQuery(conf, queryEndpoint)
+
+		queryParams := map[string]string{
+			"query": metricName,
+		}
+		if time != "" {
+			queryParams["time"] = time
+		}
+		promURL, err := baseQuery.BuildPrometheusURL(queryParams)
 		if err != nil {
 			http.Error(w, fmt.Sprintf("failed to build Prometheus query %v", err), http.StatusBadRequest)
 			return

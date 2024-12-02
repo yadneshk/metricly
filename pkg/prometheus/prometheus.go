@@ -1,83 +1,44 @@
 package prometheus
 
 import (
-	"errors"
 	"fmt"
+	"metricly/config"
 	"net/url"
 )
 
-type QueryBuilder struct {
-	BaseURL string
+type Query struct {
+	Scheme            string
+	PrometheusAddress string
+	PrometheusPort    string
+	Path              string
+	Params            map[string]string
 }
 
-// only builds the prometheus query, doesn't prepend the prometheus server address
-// promQL equivalent - cpu_total
-func (qb *QueryBuilder) BuildQuery(metricName, time string) (map[string]string, error) {
-	if metricName == "" {
-		return nil, fmt.Errorf("metric cannot be empty")
+func NewQuery(config *config.Config, endpoint string) (*Query, error) {
+	if config.Prometheus.Address == "" || config.Prometheus.Port == "" {
+		return nil, fmt.Errorf("prometheus address and port must be configured")
 	}
-
-	params := map[string]string{
-		"query": metricName,
-	}
-	// query := fmt.Sprintf("query=%s", metricName)
-	if time != "" {
-		params["time"] = time
-	}
-	return params, nil
-
-}
-
-// only builds the prometheus query, doesn't prepend the prometheus server address
-// promQL equivalent - cpu_total
-func (qb *QueryBuilder) BuildQueryRange(metricName, start, end, step string) (map[string]string, error) {
-	if metricName == "" || start == "" || end == "" || step == "" {
-		return nil, fmt.Errorf("metric, start, end, step cannot be empty")
-	}
-
-	return map[string]string{
-		"query": metricName,
-		"start": start,
-		"end":   end,
-		"step":  step,
+	return &Query{
+		Scheme:            "http",
+		PrometheusAddress: config.Prometheus.Address,
+		PrometheusPort:    config.Prometheus.Port,
+		Path:              fmt.Sprintf("/api/v1/%s", endpoint),
 	}, nil
-
 }
 
-// only builds the prometheus query, doesn't prepend the prometheus server address
-// promQL equivalent - avg_over_time(cpu_total[1h])
-func (qb *QueryBuilder) BuildAggregateQuery(metricName, operation, window string) (map[string]string, error) {
-	if metricName == "" || operation == "" || window == "" {
-		return nil, fmt.Errorf("metric, operation and window, all required to aggregate metrics")
+func (qb *Query) BuildPrometheusURL(queryParams map[string]string) (string, error) {
+
+	queryURL := &url.URL{
+		Scheme: qb.Scheme,
+		Host:   fmt.Sprintf("%s:%s", qb.PrometheusAddress, qb.PrometheusPort),
+		Path:   qb.Path,
+	}
+	baseURL := queryURL.Query()
+	for qry, val := range queryParams {
+		baseURL.Set(qry, val)
 	}
 
-	supportedOperations := map[string]string{
-		"avg": "avg_over_time",
-		"max": "max_over_time",
-		"min": "min_over_time",
-	}
-
-	opr, valid := supportedOperations[operation]
-	if !valid {
-		return nil, fmt.Errorf("unsupported operation: %s", operation)
-	}
-
-	return map[string]string{
-		"query": fmt.Sprintf("%s(%s[%s])", opr, metricName, window),
-	}, nil
-
-}
-
-func (qb *QueryBuilder) BuildPrometheusURL(query map[string]string, exprQuery string) (string, error) {
-	if query == nil {
-		return "", errors.New("query required")
-	}
-
-	queryParams := url.Values{}
-	for key, value := range query {
-		queryParams.Set(key, value)
-	}
-
-	return fmt.Sprintf("http://%s/api/v1/%s?%s", qb.BaseURL, exprQuery, queryParams.Encode()), nil
+	queryURL.RawQuery = baseURL.Encode()
+	return queryURL.String(), nil
 
 }
