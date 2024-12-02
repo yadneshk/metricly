@@ -19,6 +19,12 @@ run: build
 	@echo "Running Metricly with config: $(CONFIG_FILE)"
 	./$(BUILD_DIR)/$(APP_NAME) --config $(CONFIG_FILE)
 
+# Run all test cases
+.PHONY: tests
+tests:
+	@echo "Running tests"
+	go test ./... -v -coverprofile=coverage.out
+
 # Run Podman Compose to deploy the containers
 .PHONY: run_compose_up
 run_compose_up:
