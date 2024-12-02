@@ -7,6 +7,7 @@ import (
 	collector "metricly/internal/collector"
 	"metricly/pkg/common"
 	"os"
+	"reflect"
 	"strings"
 	"time"
 )
@@ -25,6 +26,7 @@ type cpuUsage struct {
 
 var (
 	procStat = "/proc/stat"
+	prevCPU  = cpuUsage{}
 )
 
 // ReadCPUStats reads CPU statistics from /proc/stat
@@ -137,12 +139,13 @@ func RegisterCPUMetrics(mc *collector.MetriclyCollector) {
 
 // collectCPUUsage collects the CPU usage as a percentage over a defined time interval.
 func ReportCpuUsage(mc *collector.MetriclyCollector) {
+
+	if reflect.DeepEqual(prevCPU, cpuUsage{}) {
+		// Capture initial CPU stats
+		prevCPU, _ = readCPUStats()
+		return
+	}
 	start := time.Now()
-
-	// Capture initial CPU stats
-	prevCPU, _ := readCPUStats()
-
-	time.Sleep(10 * time.Second)
 
 	// Capture current CPU stats
 	currCPU, _ := readCPUStats()

@@ -1,12 +1,10 @@
 package cpu
 
 import (
-	"log"
 	collector "metricly/internal/collector"
 	helper "metricly/internal/pollster/tests"
 	"os"
 	"testing"
-	"time"
 )
 
 func TestReadCpuStats(t *testing.T) {
@@ -107,19 +105,19 @@ cpu0 50 100 150 200 25 30 35 40 45`
 	}
 	defer os.Remove(collectorSource)
 	procStat = collectorSource
+
+	prevCPU, _ = readCPUStats()
+
+	mntContent = `cpu  200 300 400 500 60 70 80 90 100
+cpu0 100 150 200 250 30 35 40 45 50`
+
+	err = helper.SetupCollectorSources(collectorSource, mntContent)
+	if err != nil {
+		t.Fatalf("failed to setup collector file: %v", err)
+	}
+
 	mc := collector.CreateMetricCollector()
 	RegisterCPUMetrics(mc)
-
-	go func() {
-		time.Sleep(5 * time.Second)
-		fi, _ := os.OpenFile("cpustats.txt", os.O_WRONLY|os.O_TRUNC, 0644)
-		mockUpdatedStat := `cpu  200 300 400 500 60 70 80 90 100
-cpu0 100 150 200 250 30 35 40 45 50`
-		if _, err := fi.Write([]byte(mockUpdatedStat)); err != nil {
-			log.Fatalf("failed to update mock stat file: %v", err)
-		}
-		fi.Close()
-	}()
 
 	ReportCpuUsage(mc)
 
