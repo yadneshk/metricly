@@ -53,6 +53,7 @@ services:
     volumes:
       - ./config/grafana/provisioning/:/etc/grafana/provisioning/:ro,z
       - ./config/infrastructure.json:/var/lib/grafana/dashboards/infrastructure.json:ro,z
+      - ./config/go-runtime.json:/var/lib/grafana/dashboards/go-runtime.json:ro,z
     restart: always
     depends_on:
       - prometheus

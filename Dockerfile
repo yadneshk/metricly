@@ -5,7 +5,7 @@ WORKDIR /app
 # Copy and build the Go project
 COPY . .
 RUN go mod tidy
-RUN CGO_ENABLED=0 GOOS=linux go build -o metricly cmd/collector/main.go
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=x86_64 go build -o metricly cmd/collector/main.go
 
 # # Use a minimal base image for the final image
 FROM quay.io/jitesoft/alpine:3.20.3
