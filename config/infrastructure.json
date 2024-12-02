@@ -1965,7 +1965,7 @@
           "targets": [
             {
               "editorMode": "code",
-              "expr": "metricly_disk_available_bytes{hostname=\"$host\"}/1024/1024/1024",
+              "expr": "metricly_disk_used_bytes{hostname=\"$host\"}/1024/1024/1024",
               "legendFormat": "{{mount_point}}",
               "range": true,
               "refId": "A"

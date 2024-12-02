@@ -12,6 +12,10 @@ import (
 	"net/http"
 )
 
+var (
+	queryRangeEndpoint = "query_range"
+)
+
 // represents the structure of the reponse Prometheus's API call
 type PrometheusQueryRangeResponse struct {
 	Status string `json:"status"`
@@ -34,17 +38,21 @@ func prometheusQueryRangeHandler(conf *config.Config) http.HandlerFunc {
 		end := requestParams.Get("end")
 		step := requestParams.Get("step")
 
-		queryBuilder := prometheus.QueryBuilder{
-			BaseURL: fmt.Sprintf("%s:%s", conf.Prometheus.Address, conf.Prometheus.Port),
-		}
-
-		query, err := queryBuilder.BuildQueryRange(metricName, start, end, step)
-		if err != nil {
-			http.Error(w, fmt.Sprintf("failed to build aggregate query %v", err), http.StatusBadRequest)
+		if err := validateQueryParams(metricName, start, end, step); err != nil {
+			http.Error(w, fmt.Sprintf("bad request: %s", err), http.StatusBadRequest)
 			return
 		}
 
-		promURL, err := queryBuilder.BuildPrometheusURL(query, "query_range")
+		baseQuery, _ := prometheus.NewQuery(conf, queryRangeEndpoint)
+
+		queryParams := map[string]string{
+			"query": metricName,
+			"start": start,
+			"end":   end,
+			"step":  step,
+		}
+
+		promURL, err := baseQuery.BuildPrometheusURL(queryParams)
 		if err != nil {
 			http.Error(w, fmt.Sprintf("failed to build prometheus query %v", err), http.StatusBadRequest)
 			return
@@ -64,4 +72,13 @@ func prometheusQueryRangeHandler(conf *config.Config) http.HandlerFunc {
 			return
 		}
 	}
+}
+
+// validates input params for aggregate query
+func validateQueryParams(metricName, start, end, step string) error {
+	if metricName == "" || start == "" || end == "" || step == "" {
+		return fmt.Errorf("metric, start, end and step, all required to get range metrics")
+	}
+
+	return nil
 }

@@ -19,6 +19,29 @@ run: build
 	@echo "Running Metricly with config: $(CONFIG_FILE)"
 	./$(BUILD_DIR)/$(APP_NAME) --config $(CONFIG_FILE)
 
+# Run all test cases
+.PHONY: tests
+tests:
+	@echo "Running tests"
+	go test ./... -v -coverprofile=coverage.out
+
+.PHONY: run_container
+run_container:
+	@echo "Building & spawning Metricly container..."
+	podman build . -t metricly
+	podman run -d --rm --replace --name metricly \
+	-p 8080:8080 \
+	-v ./config/config.yaml:/etc/metricly/config.yaml:ro,z \
+	-v /:/host/root:ro,slave \
+	--health-cmd "/root/healthcheck metricly" \
+	-e HOSTNAME=${HOSTNAME} \
+	-e PROC_CPU_STAT=/host/root/proc/stat \
+	-e PROC_MEMORY_INFO=/host/root/proc/meminfo \
+	-e PROC_NETWORK_DEV=/host/root/proc/net/dev \
+	-e PROC_DISK_MOUNTS=/host/root/proc/mounts \
+	-e PROC_DISK_STATS=/host/root/proc/diskstats \
+	localhost/metricly:latest
+
 # Run Podman Compose to deploy the containers
 .PHONY: run_compose_up
 run_compose_up:

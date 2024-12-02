@@ -7,7 +7,7 @@ services:
     restart: always
     network_mode: host
     volumes:
-      - ./config/config.yaml:/etc/metricly/config.yaml:ro
+      - ./config/config.yaml:/etc/metricly/config.yaml:ro,z
       # - /proc/stat:/proc/stat:ro
       # - /proc/meminfo:/proc/meminfo:ro
       # - /proc/diskstats:/proc/diskstats:ro
