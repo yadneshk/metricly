@@ -15,6 +15,15 @@ import (
 var (
 	procDiskStats = "/proc/diskstats"
 	procMounts    = "/proc/mounts"
+	pseudoMounts  = map[string]bool{
+		"/tmp":  true,
+		"/sys":  true,
+		"/run":  true,
+		"/dev":  true,
+		"/proc": true,
+		"tmpfs": true,
+		"proc":  true,
+	}
 )
 
 // diskStats holds metrics for a single disk.
@@ -125,11 +134,27 @@ func readDiskSpaceStats(mountPoint []string) (map[string]diskSpaceStat, error) {
 
 }
 
+func hasAnyPrefix(s string) bool {
+	for mntPath := range pseudoMounts {
+		if strings.HasPrefix(s, mntPath) {
+			return true
+		}
+	}
+	return false
+}
+
 // GetMountPoints retrieves a list of mount points from /proc/mounts
 func getMountPoints() ([]string, error) {
 
 	if procMountsEnv := os.Getenv("PROC_DISK_MOUNTS"); procMountsEnv != "" {
 		procMounts = procMountsEnv
+
+		hostDir := strings.Split(procMountsEnv, "/proc")[0]
+		if hostDir != "" {
+			for mnt := range pseudoMounts {
+				pseudoMounts[strings.Join([]string{hostDir, mnt}, "")] = true
+			}
+		}
 	}
 
 	file, err := os.Open(procMounts)
@@ -151,7 +176,7 @@ func getMountPoints() ([]string, error) {
 		mountPoint := fields[1]
 
 		// Filter out pseudo-filesystems (optional)
-		if strings.HasPrefix(fields[2], "tmpfs") || strings.HasPrefix(fields[2], "proc") {
+		if hasAnyPrefix(fields[2]) || hasAnyPrefix(fields[1]) {
 			continue
 		}
 
@@ -159,7 +184,7 @@ func getMountPoints() ([]string, error) {
 	}
 
 	if err := scanner.Err(); err != nil {
-		return nil, fmt.Errorf("error reading /proc/mounts: %v", err)
+		return nil, fmt.Errorf("error reading %s: %v", procMounts, err)
 	}
 
 	return mountPoints, nil
