@@ -122,6 +122,13 @@ jobs:
             exit 1
           fi
 
+          RESPONSE=$(curl -s "http://127.0.0.1:8080/api/v1/query_range?metric=metricly_cpu_total&last=2m&step=15s")
+          if [[ $(echo "$RESPONSE" | jq '.data.result[0].values|length') -le 1 ]]; then
+            echo "Didn't multiple data points"
+            echo $RESPONSE
+            exit 1
+          fi
+
       - name: Test /api/v1/aggregate
         run: |
           RESPONSE=$(curl -s "http://127.0.0.1:8080/api/v1/aggregate?metric=metricly_cpu_total&operation=avg&window=1m")

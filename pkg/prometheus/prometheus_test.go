@@ -80,7 +80,6 @@ func TestBuildPrometheusURL(t *testing.T) {
 		name        string
 		queryParams map[string]string
 		expectedURL string
-		expectErr   bool
 	}{
 		{
 			name: "Valid Query Params",
@@ -89,13 +88,11 @@ func TestBuildPrometheusURL(t *testing.T) {
 				"step":  "10",
 			},
 			expectedURL: "http://localhost:9090/api/v1/query?query=cpu_usage&step=10",
-			expectErr:   false,
 		},
 		{
 			name:        "Empty Query Params",
 			queryParams: map[string]string{},
 			expectedURL: "http://localhost:9090/api/v1/query",
-			expectErr:   false,
 		},
 	}
 
@@ -108,23 +105,15 @@ func TestBuildPrometheusURL(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotURL, err := qb.BuildPrometheusURL(tt.queryParams)
-			if tt.expectErr {
-				if err == nil {
-					t.Errorf("expected error but got none")
-				}
-			} else {
-				if err != nil {
-					t.Errorf("did not expect error but got %v", err)
-				}
-				parsedGot, _ := url.Parse(gotURL)
-				parsedExpected, _ := url.Parse(tt.expectedURL)
-				if parsedGot.Scheme != parsedExpected.Scheme ||
-					parsedGot.Host != parsedExpected.Host ||
-					parsedGot.Path != parsedExpected.Path ||
-					parsedGot.Query().Encode() != parsedExpected.Query().Encode() {
-					t.Errorf("expected URL %s, got %s", tt.expectedURL, gotURL)
-				}
+			gotURL := qb.BuildPrometheusURL(tt.queryParams)
+
+			parsedGot, _ := url.Parse(gotURL)
+			parsedExpected, _ := url.Parse(tt.expectedURL)
+			if parsedGot.Scheme != parsedExpected.Scheme ||
+				parsedGot.Host != parsedExpected.Host ||
+				parsedGot.Path != parsedExpected.Path ||
+				parsedGot.Query().Encode() != parsedExpected.Query().Encode() {
+				t.Errorf("expected URL %s, got %s", tt.expectedURL, gotURL)
 			}
 		})
 	}
