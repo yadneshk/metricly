@@ -21,7 +21,11 @@ sysfs /sys sysfs rw,seclabel,nosuid,nodev,noexec,relatime 0 0
 	if err != nil {
 		t.Fatalf("failed to setup collector file: %v", err)
 	}
-	defer os.Remove(collectorSource)
+	tmpSrc := procMounts
+	defer func() {
+		os.Remove(collectorSource)
+		procMounts = tmpSrc
+	}()
 	procMounts = collectorSource
 
 	// start testing target function
@@ -29,11 +33,11 @@ sysfs /sys sysfs rw,seclabel,nosuid,nodev,noexec,relatime 0 0
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(mounts) != 5 {
+	if len(mounts) != 2 {
 		t.Errorf("incorrect count of mounts: %v", mounts)
 	}
 
-	expectedMounts := []string{"/", "/dev", "/dev/pts", "/sys", "/boot"}
+	expectedMounts := []string{"/", "/boot"}
 	for i := range len(mounts) {
 		if mounts[i] != expectedMounts[i] {
 			t.Error("incorrect mount")
@@ -52,7 +56,11 @@ func TestParseDiskStats(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to setup collector file: %v", err)
 	}
-	defer os.Remove(collectorSource)
+	tmpSrc := procDiskStats
+	defer func() {
+		os.Remove(collectorSource)
+		procDiskStats = tmpSrc
+	}()
 	procDiskStats = collectorSource
 
 	// start testing target function

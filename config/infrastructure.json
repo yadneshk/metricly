@@ -1938,7 +1938,7 @@
                   }
                 ]
               },
-              "unit": "decgbytes"
+              "unit": "percent"
             },
             "overrides": []
           },
@@ -1965,7 +1965,7 @@
           "targets": [
             {
               "editorMode": "code",
-              "expr": "metricly_disk_used_bytes{hostname=\"$host\"}/1024/1024/1024",
+              "expr": "(100*metricly_disk_used_bytes{hostname=\"$host\"})/metricly_disk_total_bytes{hostname=\"$host\"}",
               "legendFormat": "{{mount_point}}",
               "range": true,
               "refId": "A"
