@@ -22,54 +22,63 @@ func PrometheusAggregateHandler(conf *config.Config) http.HandlerFunc {
 
 		requestParams := r.URL.Query()
 
-		metricName := requestParams.Get("metric")
-		operation := requestParams.Get("operation")
-		window := requestParams.Get("window")
-
-		if err := validateAggregateParams(metricName, operation, window); err != nil {
-			http.Error(w, fmt.Sprintf("bad request: %s", err), http.StatusInternalServerError)
-			return
+		supportedParams := map[string]bool{
+			"metric":    true,
+			"operation": true,
+			"window":    true,
 		}
+		requiredParams := []string{"metric", "operation", "window"}
 
-		baseQuery, _ := prometheus.NewQuery(conf, queryEndpoint)
-
-		aggregateQuery := fmt.Sprintf("%s(%s[%s])", supportedOperations[operation], metricName, window)
-		queryParams := map[string]string{
-			"query": aggregateQuery,
-		}
-
-		promURL, err := baseQuery.BuildPrometheusURL(queryParams)
+		queryParams, err := processQueryParams(requestParams, supportedParams, requiredParams)
 		if err != nil {
-			http.Error(w, fmt.Sprintf("failed to build prometheus query %v", err), http.StatusBadRequest)
+			sendErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
 		}
 
-		var response PrometheusQueryResponse
+		// needed to replace "avg" with "avg_over_time" to make it compatible with Prom
+		queryParams, err = processAggregateParams(queryParams)
+		if err != nil {
+			sendErrorResponse(w, http.StatusInternalServerError, fmt.Sprintf("bad request: %s", err))
+			return
+		}
+
+		baseQuery, err := prometheus.NewQuery(conf, queryEndpoint)
+		if err != nil {
+			sendErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		promURL := baseQuery.BuildPrometheusURL(queryParams)
+
+		var response PrometheusResponse
 		err = QueryPrometheus(promURL, &response)
 		if err != nil {
-			http.Error(w, fmt.Sprintf("failed to query Prometheus: %v %s", err, promURL), http.StatusInternalServerError)
+			sendErrorResponse(w, http.StatusInternalServerError, fmt.Sprintf("failed to query Prometheus: %v %s", err, promURL))
 			return
 		}
 		w.WriteHeader(http.StatusOK)
 		w.Header().Set("Content-Type", "application/json")
 		err = json.NewEncoder(w).Encode(response)
 		if err != nil {
-			http.Error(w, fmt.Sprintf("failed to encode response: %s", err), http.StatusInternalServerError)
+			sendErrorResponse(w, http.StatusInternalServerError, fmt.Sprintf("failed to encode response: %s", err))
 			return
 		}
 	}
 }
 
 // validates input params for aggregate query
-func validateAggregateParams(metricName, operation, window string) error {
-	if metricName == "" || operation == "" || window == "" {
-		return fmt.Errorf("metric, operation and window, all required to aggregate metrics")
-	}
+func processAggregateParams(queryParams map[string]string) (map[string]string, error) {
 
-	_, valid := supportedOperations[operation]
+	_, valid := supportedOperations[queryParams["operation"]]
 	if !valid {
-		return fmt.Errorf("unsupported operation: %s", operation)
+		return nil, fmt.Errorf("unsupported operation: %s", queryParams["operation"])
 	}
 
-	return nil
+	queryParams["operation"] = supportedOperations[queryParams["operation"]]
+
+	aggregateQuery := fmt.Sprintf("%s(%s[%s])", queryParams["operation"], queryParams["query"], queryParams["window"])
+
+	return map[string]string{
+		"query": aggregateQuery,
+	}, nil
 }

@@ -42,58 +42,42 @@ var (
 	queryEndpoint = "query"
 )
 
-// represents the structure of the reponse Prometheus's API call
-type PrometheusQueryResponse struct {
-	Status string `json:"status"`
-	Data   struct {
-		ResultType string `json:"resultType"`
-		Result     []struct {
-			Metric map[string]string `json:"metric"`
-			Value  [2]interface{}    `json:"value"`
-		} `json:"result"`
-	} `json:"data"`
-}
-
 func PrometheusQueryHandler(conf *config.Config) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		requestParams := r.URL.Query()
 
-		// required
-		metricName := requestParams.Get("metric")
-		if metricName == "" {
-			http.Error(w, "metric name cannot be empty", http.StatusBadRequest)
-			return
+		supportedParams := map[string]bool{
+			"metric": true,
+			"time":   true,
 		}
+		requiredParams := []string{"metric"}
 
-		// optional
-		time := requestParams.Get("timestamp")
-
-		baseQuery, _ := prometheus.NewQuery(conf, queryEndpoint)
-
-		queryParams := map[string]string{
-			"query": metricName,
-		}
-		if time != "" {
-			queryParams["time"] = time
-		}
-		promURL, err := baseQuery.BuildPrometheusURL(queryParams)
+		queryParams, err := processQueryParams(requestParams, supportedParams, requiredParams)
 		if err != nil {
-			http.Error(w, fmt.Sprintf("failed to build Prometheus query %v", err), http.StatusBadRequest)
+			sendErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
 		}
 
-		var response PrometheusQueryResponse
+		baseQuery, err := prometheus.NewQuery(conf, queryEndpoint)
+		if err != nil {
+			sendErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		promURL := baseQuery.BuildPrometheusURL(queryParams)
+
+		var response PrometheusResponse
 		err = QueryPrometheus(promURL, &response)
 		if err != nil {
-			http.Error(w, fmt.Sprintf("failed to query Prometheus: %v %s", err, promURL), http.StatusInternalServerError)
+			sendErrorResponse(w, http.StatusInternalServerError, fmt.Sprintf("failed to query Prometheus: %v %s", err, promURL))
 			return
 		}
 		w.WriteHeader(http.StatusOK)
 		w.Header().Set("Content-Type", "application/json")
 		err = json.NewEncoder(w).Encode(response)
 		if err != nil {
-			http.Error(w, fmt.Sprintf("failed to encode response: %s", err), http.StatusInternalServerError)
+			sendErrorResponse(w, http.StatusInternalServerError, fmt.Sprintf("failed to encode response: %s", err))
 			return
 		}
 	}

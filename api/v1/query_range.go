@@ -10,75 +10,83 @@ import (
 	"metricly/config"
 	"metricly/pkg/prometheus"
 	"net/http"
+	"time"
 )
 
 var (
 	queryRangeEndpoint = "query_range"
 )
 
-// represents the structure of the reponse Prometheus's API call
-type PrometheusQueryRangeResponse struct {
-	Status string `json:"status"`
-	Data   struct {
-		ResultType string `json:"resultType"`
-		Result     []struct {
-			Metric map[string]string `json:"metric"`
-			Values [][]interface{}   `json:"values"`
-		} `json:"result"`
-	} `json:"data"`
-}
-
 func prometheusQueryRangeHandler(conf *config.Config) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		requestParams := r.URL.Query()
 
-		metricName := requestParams.Get("metric")
-		start := requestParams.Get("start")
-		end := requestParams.Get("end")
-		step := requestParams.Get("step")
+		supportedParams := map[string]bool{
+			"metric": true,
+			"start":  true,
+			"end":    true,
+			"last":   true,
+			"step":   true,
+		}
 
-		if err := validateQueryParams(metricName, start, end, step); err != nil {
-			http.Error(w, fmt.Sprintf("bad request: %s", err), http.StatusBadRequest)
+		queryParams, err := processQueryParams(requestParams, supportedParams, []string{})
+		if err != nil {
+			sendErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		queryParams, err = processRangeParams(queryParams)
+		if err != nil {
+			sendErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
 		}
 
 		baseQuery, _ := prometheus.NewQuery(conf, queryRangeEndpoint)
 
-		queryParams := map[string]string{
-			"query": metricName,
-			"start": start,
-			"end":   end,
-			"step":  step,
-		}
-
-		promURL, err := baseQuery.BuildPrometheusURL(queryParams)
-		if err != nil {
-			http.Error(w, fmt.Sprintf("failed to build prometheus query %v", err), http.StatusBadRequest)
-			return
-		}
+		promURL := baseQuery.BuildPrometheusURL(queryParams)
 
 		var response PrometheusQueryRangeResponse
 		err = QueryPrometheus(promURL, &response)
 		if err != nil {
-			http.Error(w, fmt.Sprintf("failed to query Prometheus: %v %s", err, promURL), http.StatusInternalServerError)
+			sendErrorResponse(w, http.StatusInternalServerError, fmt.Sprintf("failed to query Prometheus: %v %s", err, promURL))
 			return
 		}
 		w.WriteHeader(http.StatusOK)
 		w.Header().Set("Content-Type", "application/json")
 		err = json.NewEncoder(w).Encode(response)
 		if err != nil {
-			http.Error(w, fmt.Sprintf("failed to encode response: %s", err), http.StatusInternalServerError)
+			sendErrorResponse(w, http.StatusInternalServerError, fmt.Sprintf("failed to encode response: %s", err))
 			return
 		}
 	}
 }
 
-// validates input params for aggregate query
-func validateQueryParams(metricName, start, end, step string) error {
-	if metricName == "" || start == "" || end == "" || step == "" {
-		return fmt.Errorf("metric, start, end and step, all required to get range metrics")
+func processRangeParams(requestParams map[string]string) (map[string]string, error) {
+
+	if requestParams["last"] != "" {
+		if requestParams["start"] != "" || requestParams["end"] != "" {
+			return nil, fmt.Errorf("start, end and last cannot be used together, either use start and end or just last to get a range of datapoints")
+		}
+
+		duration, err := time.ParseDuration(requestParams["last"])
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse time %s to epoch time", requestParams["last"])
+		}
+		end := time.Now().Unix()
+		start := time.Now().Add(-duration).Unix()
+
+		delete(requestParams, "last")
+		requestParams["start"] = fmt.Sprint(start)
+		requestParams["end"] = fmt.Sprint(end)
+	} else if requestParams["start"] == "" || requestParams["end"] == "" {
+		return nil, fmt.Errorf("start and end both required to get a range of datapoints")
 	}
 
-	return nil
+	if _, stepExists := requestParams["step"]; !stepExists {
+		requestParams["step"] = "15s"
+	}
+
+	return requestParams, nil
+
 }

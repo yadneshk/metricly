@@ -26,7 +26,7 @@ func NewQuery(config *config.Config, endpoint string) (*Query, error) {
 	}, nil
 }
 
-func (qb *Query) BuildPrometheusURL(queryParams map[string]string) (string, error) {
+func (qb *Query) BuildPrometheusURL(queryParams map[string]string) string {
 
 	queryURL := &url.URL{
 		Scheme: qb.Scheme,
@@ -39,6 +39,6 @@ func (qb *Query) BuildPrometheusURL(queryParams map[string]string) (string, erro
 	}
 
 	queryURL.RawQuery = baseURL.Encode()
-	return queryURL.String(), nil
+	return queryURL.String()
 
 }
