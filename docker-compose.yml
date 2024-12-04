@@ -8,11 +8,6 @@ services:
     network_mode: host
     volumes:
       - ./config/config.yaml:/etc/metricly/config.yaml:ro,z
-      # - /proc/stat:/proc/stat:ro
-      # - /proc/meminfo:/proc/meminfo:ro
-      # - /proc/diskstats:/proc/diskstats:ro
-      # - /proc/net/dev:/mnt/metricly/dev:ro
-      # - /proc/self/mounts:/mnt/metricly/mounts:ro
       - /:/host/root:ro,rslave # Changes in the source (host) are reflected in the container, not vice-versa
     environment:
       - HOSTNAME=${HOSTNAME}
@@ -22,7 +17,7 @@ services:
       - PROC_DISK_MOUNTS=/host/root/proc/mounts
       - PROC_DISK_STATS=/host/root/proc/diskstats
     healthcheck:
-      test: ["CMD", "/root/healthcheck metricly"]
+      test: ["CMD", "/bin/sh /metricly/healthcheck metricly"]
       interval: 30s   
       timeout: 5s     
       retries: 3      
@@ -34,6 +29,7 @@ services:
     network_mode: host
     volumes:
       - ./config/prometheus/:/etc/prometheus/:ro,z
+      - ./config/prometheus/alerts:/etc/prometheus/alerts:ro,z
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
@@ -52,8 +48,18 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     volumes:
       - ./config/grafana/provisioning/:/etc/grafana/provisioning/:ro,z
-      - ./config/infrastructure.json:/var/lib/grafana/dashboards/infrastructure.json:ro,z
-      - ./config/go-runtime.json:/var/lib/grafana/dashboards/go-runtime.json:ro,z
+      - ./config/grafana/visualizations/infrastructure.json:/var/lib/grafana/dashboards/infrastructure.json:ro,z
+      - ./config/grafana/visualizations/go-runtime.json:/var/lib/grafana/dashboards/go-runtime.json:ro,z
+    restart: always
+    depends_on:
+      - prometheus
+
+  alertmanager:
+    container_name: metricly_alertmanager
+    image: docker.io/prom/alertmanager:v0.27.0
+    network_mode: host
+    volumes:
+      - ./config/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro,z
     restart: always
     depends_on:
       - prometheus

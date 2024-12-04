@@ -8,3 +8,12 @@ scrape_configs:
     static_configs:
       - targets:
           - '127.0.0.1:8080' # Target where your app exposes metrics
+
+rule_files:
+  - "/etc/prometheus/alerts/*.yml"
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - '127.0.0.1:9093'

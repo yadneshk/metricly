@@ -1,0 +1,20 @@
+groups:
+  - name: disk_alerts
+    rules:
+      - alert: Disk Usage > 60%
+        expr: 100*metricly_disk_used_bytes/metricly_disk_total_bytes > 60
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High Disk usage detected"
+          description: "Disk usage is above 60%"
+
+      - alert: Disk Usage > 80%
+        expr: 100*metricly_disk_used_bytes/metricly_disk_total_bytes > 80
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High Disk usage detected"
+          description: "Disk usage is above 80%"

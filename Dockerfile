@@ -9,16 +9,19 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o metricly cmd/collector/main.go
 
 # # Use a minimal base image for the final image
 FROM quay.io/jitesoft/alpine:3.20.3
-WORKDIR /root
-COPY --from=builder /app/metricly .
+COPY --from=builder /app/metricly /bin/metricly
+WORKDIR /metricly
 COPY ./config/healthcheck .
-RUN chmod +x /root/healthcheck
+
 RUN mkdir /etc/metricly
+RUN chown -R nobody:nobody /etc/metricly /metricly
+
 # Expose the port
 EXPOSE 8080
+USER nobody
 
 # Run the metrics collector
-ENTRYPOINT ["./metricly"]
+ENTRYPOINT ["/bin/metricly"]
 
 # Default agrs
 CMD ["--config", "/etc/metricly/config.yaml"]
