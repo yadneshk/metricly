@@ -33,7 +33,7 @@ run_container:
 	-p 8080:8080 \
 	-v ./config/config.yaml:/etc/metricly/config.yaml:ro,z \
 	-v /:/host/root:ro,slave \
-	--health-cmd "/root/healthcheck metricly" \
+	--health-cmd "/metricly/healthcheck metricly" \
 	-e HOSTNAME=${HOSTNAME} \
 	-e PROC_CPU_STAT=/host/root/proc/stat \
 	-e PROC_MEMORY_INFO=/host/root/proc/meminfo \
