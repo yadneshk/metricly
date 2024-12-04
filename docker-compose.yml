@@ -54,3 +54,12 @@ services:
     depends_on:
       - prometheus
 
+  alertmanager:
+    container_name: metricly_alertmanager
+    image: docker.io/prom/alertmanager:v0.27.0
+    network_mode: host
+    volumes:
+      - ./config/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro,z
+    restart: always
+    depends_on:
+      - prometheus

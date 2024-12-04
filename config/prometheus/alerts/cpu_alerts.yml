@@ -1,0 +1,20 @@
+groups:
+  - name: cpu_alerts
+    rules:
+      - alert: CPUUsage > 60%
+        expr: avg_over_time(metricly_cpu_total[5m]) > 60
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage detected"
+          description: "CPU usage is above 60% for the last 5 minutes on host {{ $labels.host }}"
+
+      - alert: CPUUsage > 80%
+        expr: avg_over_time(metricly_cpu_total[15m]) > 80
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High CPU usage detected"
+          description: "CPU usage is above 80% for the last 15 minutes on host {{ $labels.host }}"

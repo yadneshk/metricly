@@ -23,6 +23,8 @@
   - Logs incoming and outgoing API requests with support for multiple log levels (INFO, DEBUG, ERROR).
 - **Metrics Visualization**
   - Provides an inbuilt `Grafana` dashboard to visualize all metrics.
+- **Alerting Mechanism**
+  - Provides an inbuilt `Alertmanager` rules that send Gmail alerts.
 ---
 
 ## **Getting Started**
@@ -370,6 +372,17 @@ The Metricly exporter provides the following API endpoints:
         }
       }
       ```      
+
+### **Alertmanager Configuration** ###
+Metricly provides a few inbuilt alerts to monitor high utilization of CPU, Memory and Disk usage.
+
+![Sample Alerts](doc/alerts.png)
+
+Upon meeting condition for any alert, an email notification is sent to the receiver configured in `config/alertmanager/alertmanager.yml`
+
+![High CPU Alert](doc/high_cpu_alert.png)
+
+To include more alerts, take a look at `config/prometheus/alerts/`. Similar alerts can be built and added to the same directory.
 
 ### **Development**
 

@@ -1,0 +1,20 @@
+groups:
+  - name: memory_alerts
+    rules:
+      - alert: Memory Usage > 60%
+        expr: 100*(metricly_memory_total_bytes-metricly_memory_available_bytes)/metricly_memory_total_bytes > 60
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High Memory usage detected"
+          description: "Memory usage is above 60%"
+
+      - alert: Memory Usage > 80%
+        expr: 100*(metricly_memory_total_bytes-metricly_memory_available_bytes)/metricly_memory_total_bytes > 80
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High Memory usage detected"
+          description: "Memory usage is above 80%"
