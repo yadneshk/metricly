@@ -34,7 +34,6 @@
 - **Podman** (for containerized deployment)
 - **Prometheus** (for metrics scraping)
 
----
 
 ### **Installation**
 
@@ -148,6 +147,20 @@ localhost/metricly:latest
 ```
 
 Prebuilt images with latest commits are pushed to [Quay](https://quay.io/repository/yadneshk/metricly?tab=tags).
+
+**Deploy on OpenShift**
+```bash
+oc new-project monitoring
+oc create -f manifests/metricly/security-ctx-constraint.yml
+oc create -f manifests/metricly/service-account.yml
+oc adm policy add-scc-to-user metricly -z metricly -n monitoring
+oc create -f manifests/metricly/config-map.yml
+oc create -f manifests/metricly/daemonset.yml
+oc create -f manifests/metricly/service.yml
+oc expose svc metricly
+```
+> [!NOTE]
+Currently these steps only deploy Metricly, it doesn't prepare any resources for alerts or data visualizations.
 
 ---
 
@@ -371,7 +384,8 @@ The Metricly exporter provides the following API endpoints:
           ]
         }
       }
-      ```      
+      ```
+---
 
 ### **Alertmanager Configuration** ###
 Metricly provides a few inbuilt alerts to monitor high utilization of CPU, Memory and Disk usage.
@@ -383,6 +397,8 @@ Upon meeting condition for any alert, an email notification is sent to the recei
 ![High CPU Alert](doc/high_cpu_alert.png)
 
 To include more alerts, take a look at `config/prometheus/alerts/`. Similar alerts can be built and added to the same directory.
+
+---
 
 ### **Development**
 

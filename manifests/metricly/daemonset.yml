@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: metricly
+  namespace: monitoring
+spec:
+  selector:
+    matchLabels:
+      app: metricly
+  template:
+    metadata:
+      annotations:
+        openshift.io/required-scc: metricly
+      labels:
+        app: metricly
+    spec:
+      nodeSelector:
+        kubernetes.io/os: linux
+      serviceAccountName: metricly
+      containers:
+        - name: metricly
+          image: quay.io/yadneshk/metricly:latest
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/metricly
+              readOnly: true
+            - name: host-filesystem
+              mountPath: /host/root/
+              mountPropagation: HostToContainer
+              readOnly: true
+          env:
+            - name: PROC_CPU_STAT
+              value: /host/root/proc/stat
+            - name: PROC_MEMORY_INFO
+              value: /host/root/proc/meminfo
+            - name: PROC_NETWORK_DEV
+              value: /host/root/proc/net/dev
+            - name: PROC_DISK_MOUNTS
+              value: /host/root/proc/mounts
+            - name: PROC_DISK_STATS
+              value: /host/root/proc/diskstats
+            - name: IGNORE_MOUNTS
+              value: "overlay,shm"
+          securityContext:
+            runAsUser: 0           
+      volumes:
+        - name: config-volume
+          configMap:
+            name: metricly-config
+        - name: host-filesystem
+          hostPath:
+            path: /
+
+---
+
